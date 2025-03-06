@@ -1,4 +1,4 @@
-const IncomeController = require("../models/IncomeModel")
+const IncomeModel = require("../models/IncomeModel")
 const addIncome = async (req,res) =>{
     try{
 
