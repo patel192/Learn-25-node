@@ -5,11 +5,14 @@ app.use(express.json())
 const cors = require("cors");
 app.use(cors());
 
-
-
-
+const categoryRoutes = require("./src/routes/CategoryRoutes")
 const userRoutes = require("./src/routes/UserRoutes")
+const expenseRoutes = require("./src/routes/ExpenseRoutes")
+
+
+app.use(categoryRoutes)
 app.use(userRoutes)
+app.use(expenseRoutes)
 
 mongoose.connect("mongodb://localhost:27017/25_node_internship").then(()=>{
     console.log("database connected")
