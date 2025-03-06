@@ -17,7 +17,7 @@ const addExpense = async (req, res) => {
 };
 const getExpense = async (req, res) => {
   try {
-    const expenses = await ExpenseModel.find().populate("categoryID");
+    const expenses = await ExpenseModel.find().populate("categoryID").populate("userID");
     res.status(200).json({
       message: "the expenses fetched successfully",
       data: expenses,

@@ -13,6 +13,10 @@ const ExpenseSchema = new Schema({
     },
     description:{
       type:String
+    },
+    userID:{
+        type:Schema.Types.ObjectId,
+        ref:"users"
     }
 }, {
     timestamps:true

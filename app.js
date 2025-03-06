@@ -8,11 +8,13 @@ app.use(cors());
 const categoryRoutes = require("./src/routes/CategoryRoutes")
 const userRoutes = require("./src/routes/UserRoutes")
 const expenseRoutes = require("./src/routes/ExpenseRoutes")
-
+const incomeRoutes = require("./src/routes/IncomeRoutes")
 
 app.use(categoryRoutes)
 app.use(userRoutes)
 app.use(expenseRoutes)
+app.use(incomeRoutes)
+
 
 mongoose.connect("mongodb://localhost:27017/25_node_internship").then(()=>{
     console.log("database connected")
