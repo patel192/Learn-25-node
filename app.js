@@ -10,12 +10,14 @@ const userRoutes = require("./src/routes/UserRoutes")
 const expenseRoutes = require("./src/routes/ExpenseRoutes")
 const incomeRoutes = require("./src/routes/IncomeRoutes")
 const transactionRoutes = require("./src/routes/TransactionRoutes")
+const budgetRoutes = require("./src/routes/BudgetRouter")
 
 app.use(categoryRoutes)
 app.use(userRoutes)
 app.use(expenseRoutes)
 app.use(incomeRoutes)
 app.use(transactionRoutes)
+app.use(budgetRoutes)
 
 
 mongoose.connect("mongodb://localhost:27017/25_node_internship").then(()=>{
