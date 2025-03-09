@@ -1,13 +1,5 @@
 const UserModel = require("../models/UserModel")
 
-const addUser = async (req,res) =>{
-  const addUser = await UserModel.create(req.body);
-  res.json({
-    message:"the user is created",
-    data:addUser
-  })
-}
-
 const getUser = async (req,res) =>{
   const getuser = await UserModel.findById(req.params.id);
   res.json({
@@ -37,7 +29,6 @@ const SignUp = async (req,res) =>{
   })
 }
 module.exports = {
-  addUser,
   getUser,
   getAllusers,
   deleteUser,
