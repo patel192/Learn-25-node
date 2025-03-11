@@ -26,6 +26,32 @@ const GetAllusers = async (req,res) =>{
         })
     }
 }
+const GetuserbyId = async (req,res) =>{
+    try{
+      const UserbyID = await UserModel.findById(req.params.id)
+      res.status(200).json({
+        message:"the user found successfully",
+        data:UserbyID
+      })
+    }catch(err){
+      res.status(404).json({
+        message:err.message
+      })
+    }
+}
+const DeleteUser = async (req,res) =>{
+    try{
+       const Deleteduser = await UserModel.findByIdAndDelete(req.params.id)
+       res.status(200).json({
+        message:"the user deleted successfully"
+       })
+    }catch(err){ 
+        res.status(404).json({
+            message:err.message
+        })
+
+    }
+}
 module.exports = {
-    Adduser,GetAllusers
+    Adduser,GetAllusers,GetuserbyId,DeleteUser
 }
