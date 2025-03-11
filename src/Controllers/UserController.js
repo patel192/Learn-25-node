@@ -1,36 +1,31 @@
 const UserModel = require("../models/UserModel")
+const Adduser = async (req,res) =>{
+    try{ 
+         const AddedUser = await UserModel.create(req.body);
+         res.status(201).json({
+         message:"the user is created successfully",
+         data:AddedUser
+})
+    }catch(err){
+        res.status(500).json({
+            message:err.message
+        })
+    }
+}
+const GetAllusers = async (req,res) =>{
+    try{
+        const Allusers = await UserModel.find()
+        res.status(200).json({
+            message:"the users found successfully",
+            data:Allusers
+        })
 
-const getUser = async (req,res) =>{
-  const getuser = await UserModel.findById(req.params.id);
-  res.json({
-    message:"user found successfully",
-    data:getuser,
-  })
-}
-const getAllusers = async (req,res) => {
-  const getallUser = await UserModel.find();
-  res.json({
-    message:"data fetched successfully",
-    data:getallUser,
-  })
-}
-const deleteUser = async (req,res) => {
-  const deletedUser = await UserModel.findByIdAndDelete(req.params.id);
-  res.json({
-    message:"the user is deleted successfully",
-    data:deletedUser
-  })
-}
-const SignUp = async (req,res) =>{
-  const createdUser = await UserModel.create(req.body);
-  res.status(201).json({
-    message:"user created successfully",
-    data :createdUser
-  })
+    }catch(err){
+        res.status(404).json({
+            message:err.message
+        })
+    }
 }
 module.exports = {
-  getUser,
-  getAllusers,
-  deleteUser,
-  SignUp
+    Adduser,GetAllusers
 }
