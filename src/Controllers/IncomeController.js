@@ -30,7 +30,7 @@ const GetIncomebyID = async (req,res) =>{
     try{
       const IncomebyID = await IncomeModel.findById(req.params.id)
       res.status(200).json({
-        message:"the user found successfully",
+        message:"the income found successfully",
         data:IncomebyID
       })
     }catch(err){
@@ -43,7 +43,7 @@ const DeleteIncome = async (req,res) =>{
     try{
        const DeletedIncome = await IncomeModel.findByIdAndDelete(req.params.id)
        res.status(200).json({
-        message:"the user deleted successfully"
+        message:"the income deleted successfully"
        })
     }catch(err){ 
         res.status(404).json({
