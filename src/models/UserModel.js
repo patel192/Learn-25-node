@@ -12,6 +12,10 @@ const UserSchema = new Schema({
     },
     password:{
         type:String
+    },
+    roleID:{
+        type:Schema.Types.ObjectId,
+        ref:"role"
     }
 },{
     timestamps:true
