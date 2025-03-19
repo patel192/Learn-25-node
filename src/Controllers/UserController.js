@@ -70,10 +70,37 @@ const SignupUser = async (req, res) => {
     });
   }
 };
+const LoginUser = async (req,res) => {
+  const email = req.body.email;
+  const password = req.body.password;
+
+
+  const foundUserFromEmail = await UserModel.findOne({ email: email }).populate("roleID")
+  console.log(foundUserFromEmail);
+  if (foundUserFromEmail != null) {
+    const isMatch = bcrypt.compareSync(password, foundUserFromEmail.password);
+   
+    if (isMatch == true) {
+      res.status(200).json({
+        message: "login success",
+        data: foundUserFromEmail,
+      });
+    } else {
+      res.status(404).json({
+        message: "invalid cred..",
+      });
+    }
+  } else {
+    res.status(404).json({
+      message: "Email not found..",
+    });
+  }
+}
 module.exports = {
   Adduser,
   GetAllusers,
   GetuserbyId,
   DeleteUser,
   SignupUser,
+  LoginUser
 };
