@@ -28,7 +28,7 @@ const GetAllusers = async (req, res) => {
 };
 const GetuserbyId = async (req, res) => {
   try {
-    const UserbyID = await UserModel.findById(req.params.id);
+    const UserbyID = await UserModel.findById(req.params.id).populate("roleID");
     res.status(200).json({
       message: "the user found successfully",
       data: UserbyID,
@@ -53,6 +53,8 @@ const DeleteUser = async (req, res) => {
 };
 const SignupUser = async (req, res) => {
   try {
+    console.log("Received Signup Data:", req.body); // Debugging
+
     const salt = bcrypt.genSaltSync(10);
     const hashedPassword = bcrypt.hashSync(req.body.password, salt);
     req.body.password = hashedPassword;
@@ -65,17 +67,19 @@ const SignupUser = async (req, res) => {
   } catch (err) {
     console.log(err);
     res.status(500).json({
-      message: "error",
+      message: "Error",
       data: err,
     });
   }
 };
+
+
 const LoginUser = async (req,res) => {
   const email = req.body.email;
   const password = req.body.password;
 
 
-  const foundUserFromEmail = await UserModel.findOne({ email: email }).populate("roleID")
+  const foundUserFromEmail = await UserModel.findOne({ email: email }).populate("roleId")
   console.log(foundUserFromEmail);
   if (foundUserFromEmail != null) {
     const isMatch = bcrypt.compareSync(password, foundUserFromEmail.password);
