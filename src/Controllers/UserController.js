@@ -1,5 +1,8 @@
 const UserModel = require("../models/UserModel");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken")
+const mailutil = require("../utiles/MailUtil")
+const secret = "secret"
 const Adduser = async (req, res) => {
   try {
     const AddedUser = await UserModel.create(req.body);
@@ -100,11 +103,32 @@ const LoginUser = async (req,res) => {
     });
   }
 }
+const ForgotPassword = async(req,res) => {
+  const email = req.body.email;
+  const founduser = await UserModel.findOne({email:email});
+  if(founduser){
+    const token = jwt.sign(founduser.toObject(),secret);
+    console.log(token);
+    const url = `http://localhost:5173/resetpassword/${token}`;
+    const mailcontent = `<html>
+    <a href="${url}">reset paasword</a>
+    </html>`
+    await mailutil.sendingMail(founduser.email,"reset password",mailcontent);
+    res.json({
+      message:"reset password link sended to the email"
+    })
+  }else{
+    res.json({
+      message:"user not found please register first"
+    })
+  }
+}
 module.exports = {
   Adduser,
   GetAllusers,
   GetuserbyId,
   DeleteUser,
   SignupUser,
-  LoginUser
+  LoginUser,
+  ForgotPassword
 };
