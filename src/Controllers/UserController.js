@@ -104,6 +104,7 @@ const LoginUser = async (req,res) => {
   }
 }
 const ForgotPassword = async(req,res) => {
+  console.log(req.body.email)
   const email = req.body.email;
   const founduser = await UserModel.findOne({email:email});
   if(founduser){
