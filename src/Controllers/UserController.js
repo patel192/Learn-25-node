@@ -124,6 +124,23 @@ const ForgotPassword = async(req,res) => {
     })
   }
 }
+const Resetpassword = async (req, res) => {
+  const token = req.body.token; //decode --> email | id
+  const newPassword = req.body.password;
+
+  const userFromToken = jwt.verify(token, secret);
+  //object -->email,id..
+  //password encrypt...
+  const salt = bcrypt.genSaltSync(10);
+  const hashedPassword = bcrypt.hashSync(newPassword,salt);
+
+  const updatedUser = await UserModel.findByIdAndUpdate(userFromToken._id, {
+    password: hashedPassword,
+  });
+  res.status(200).json({
+    message: "password updated successfully..",
+  });
+};
 module.exports = {
   Adduser,
   GetAllusers,
@@ -131,5 +148,6 @@ module.exports = {
   DeleteUser,
   SignupUser,
   LoginUser,
-  ForgotPassword
+  ForgotPassword,
+  Resetpassword
 };
