@@ -63,8 +63,10 @@ const SignupUser = async (req, res) => {
     req.body.password = hashedPassword;
 
     const createdUser = await UserModel.create(req.body);
+    await mailutil.sendingMail(createdUser.email,"Welcome to Expense Manager","This is Welcome Email");
     res.status(201).json({
       message: "User created successfully",
+      
       data: createdUser,
     });
   } catch (err) {
