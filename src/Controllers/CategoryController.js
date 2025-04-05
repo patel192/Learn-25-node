@@ -15,7 +15,7 @@ const AddCategory = async (req,res) =>{
 }
 const GetAllCategory = async (req,res) =>{
     try{
-        const Allcategory = await CategoryModel.find().populate("userID")
+        const Allcategory = await CategoryModel.find()
         res.status(200).json({
             message:"the categories found successfully",
             data:Allcategory

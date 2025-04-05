@@ -51,6 +51,11 @@ const DeleteIncome = async (req,res) =>{
         })
 
     }
+    // const GetIncomebyUserId = async(req,res) =>{
+    //     try{
+    //         const Income = await IncomeModel.find
+    //     }
+    // }
 }
 module.exports = {
     AddIncome,GetAllincome,GetIncomebyID,DeleteIncome

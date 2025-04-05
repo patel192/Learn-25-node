@@ -5,7 +5,7 @@ const BudgetSchema = new Schema({
         type:Schema.Types.ObjectId,
         ref:"users"
     },
-    categoryId:{
+    categoryID:{
         type:Schema.Types.ObjectId,
         ref:"category"
     },

@@ -14,7 +14,7 @@ const AddBudget = async (req,res) =>{
 }
 const GetAllbudget = async (req,res) =>{
     try{
-        const Allbudget = await BudgetModel.find()
+        const Allbudget = await BudgetModel.find().populate("categoryID")
         res.status(200).json({
             message:"the budgets fetched successfully",
             data:Allbudget
