@@ -1,4 +1,4 @@
-const IncomeModel = require("../models/IncomeModel")
+const IncomeModel = require("../models/IncomeModel");
 const AddIncome = async (req,res) =>{
     try{ 
          const AddedIncome = await IncomeModel.create(req.body);
@@ -51,12 +51,28 @@ const DeleteIncome = async (req,res) =>{
         })
 
     }
-    // const GetIncomebyUserId = async(req,res) =>{
-    //     try{
-    //         const Income = await IncomeModel.find
-    //     }
-    // }
+    
+}
+const GetIncomebyUserID = async(req,res) =>{
+    try{
+        const IncomebyUserID = await IncomeModel.find({userID:req.params.id}).populate("userID");
+        if(IncomebyUserID.length === 0){
+           res.status(404).json({
+            message:"No Income Found"
+           })
+        }else{
+           res.status(200).json({
+            message:"Income Found Successfully",
+            data:IncomebyUserID
+           })
+        }
+        
+    }catch(error){
+        res.status(500).json({
+            message:error.message
+        })
+    }
 }
 module.exports = {
-    AddIncome,GetAllincome,GetIncomebyID,DeleteIncome
+    AddIncome,GetAllincome,GetIncomebyID,DeleteIncome,GetIncomebyUserID
 }
