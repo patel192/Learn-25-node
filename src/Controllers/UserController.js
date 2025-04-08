@@ -18,7 +18,7 @@ const Adduser = async (req, res) => {
 };
 const GetAllusers = async (req, res) => {
   try {
-    const Allusers = await UserModel.find();
+    const Allusers = await UserModel.find().populate("roleId");
     res.status(200).json({
       message: "the users found successfully",
       data: Allusers,

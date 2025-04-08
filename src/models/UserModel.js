@@ -18,6 +18,10 @@ const UserSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: "role",
     },
+    is_active:{
+      type:Boolean,
+      default:true
+    }
   },
   {
     timestamps: true,

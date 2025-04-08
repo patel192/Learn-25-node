@@ -52,7 +52,7 @@ const GetExpensebyID = async (req,res) => {
 }
 const GetExpensebyUserId = async (req,res) => {
     try{
-      const ExpensebyUserID = await ExpenseModel.find({userID:req.params.id}).populate("categoryID userID");
+      const ExpensebyUserID = await ExpenseModel.find({userID:req.params.id}).populate("userID");
       if(ExpensebyUserID.length === 0){
         res.status(404).json({
             message:"No Expenses Found"
