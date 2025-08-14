@@ -56,55 +56,72 @@ const DeleteUser = async (req, res) => {
 };
 const SignupUser = async (req, res) => {
   try {
-    console.log("Received Signup Data:", req.body); // Debugging
+    console.log("Received Signup Data:", req.body);
+
+    if (!req.body.roleId) {
+      return res.status(400).json({ message: "roleId is required" });
+    }
 
     const salt = bcrypt.genSaltSync(10);
     const hashedPassword = bcrypt.hashSync(req.body.password, salt);
     req.body.password = hashedPassword;
 
-    const createdUser = await UserModel.create(req.body);
-    await mailutil.sendingMail(createdUser.email,"Welcome to Expense Manager","This is Welcome Email");
+    // Save user with roleId
+    const createdUser = await UserModel.create({
+      name: req.body.name,
+      email: req.body.email,
+      password: req.body.password,
+      roleId: req.body.roleId,
+    });
+
+    await mailutil.sendingMail(
+      createdUser.email,
+      "Welcome to Expense Manager",
+      "This is Welcome Email"
+    );
+
+    const populatedUser = await UserModel.findById(createdUser._id).populate("roleId");
+
     res.status(201).json({
       message: "User created successfully",
-      
-      data: createdUser,
+      data: populatedUser,
     });
   } catch (err) {
-    console.log(err);
+    console.error(err);
     res.status(500).json({
-      message: "Error",
-      data: err,
+      message: "Error creating user",
+      error: err.message,
     });
   }
 };
 
 
-const LoginUser = async (req,res) => {
-  const email = req.body.email;
-  const password = req.body.password;
 
+const LoginUser = async (req, res) => {
+  try {
+    const { email, password } = req.body;
 
-  const foundUserFromEmail = await UserModel.findOne({ email: email }).populate("roleId")
-  console.log(foundUserFromEmail);
-  if (foundUserFromEmail != null) {
-    const isMatch = bcrypt.compareSync(password, foundUserFromEmail.password);
-   
-    if (isMatch == true) {
-      res.status(200).json({
-        message: "login success",
-        data: foundUserFromEmail,
-      });
-    } else {
-      res.status(404).json({
-        message: "invalid cred..",
-      });
+    const foundUser = await UserModel.findOne({ email }).populate("roleId");
+    if (!foundUser) {
+      return res.status(404).json({ message: "Email not found" });
     }
-  } else {
-    res.status(404).json({
-      message: "Email not found..",
+
+    const isMatch = bcrypt.compareSync(password, foundUser.password);
+    if (!isMatch) {
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
+
+    res.status(200).json({
+      message: "Login success",
+      data: foundUser,
+    });
+  } catch (err) {
+    res.status(500).json({
+      message: "Error logging in",
+      error: err.message,
     });
   }
-}
+};
 const ForgotPassword = async(req,res) => {
   console.log(req.body.email)
   const email = req.body.email;
