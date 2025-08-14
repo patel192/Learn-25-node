@@ -69,6 +69,22 @@ const GetExpensebyUserId = async (req,res) => {
       })
     }
 }
+const GetRecentExpenses = async (req,res) => {
+  try{
+   const recentExpenses = await ExpenseModel.find({ userID: req.params.userId })
+      .sort({ date: -1 }) // newest first
+      .limit(5); // limit to 5 results
+
+    res.status(200).json({
+      success: true,
+      data: recentExpenses
+    }); 
+  }catch(err){
+  res.status(500).json({
+    message:err.message
+  })
+  }
+}
 module.exports = {
-    AddExpense,GetAllExpenses,DeleteExpense,GetExpensebyID,GetExpensebyUserId
+    AddExpense,GetAllExpenses,DeleteExpense,GetExpensebyID,GetExpensebyUserId,GetRecentExpenses
 }
