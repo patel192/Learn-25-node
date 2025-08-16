@@ -18,7 +18,7 @@ const Adduser = async (req, res) => {
 };
 const GetAllusers = async (req, res) => {
   try {
-    const Allusers = await UserModel.find().populate("roleId");
+    const Allusers = await UserModel.find();
     res.status(200).json({
       message: "the users found successfully",
       data: Allusers,
@@ -31,7 +31,7 @@ const GetAllusers = async (req, res) => {
 };
 const GetuserbyId = async (req, res) => {
   try {
-    const UserbyID = await UserModel.findById(req.params.id).populate("roleId");
+    const UserbyID = await UserModel.findById(req.params.id);
     res.status(200).json({
       message: "the user found successfully",
       data: UserbyID,
@@ -57,11 +57,6 @@ const DeleteUser = async (req, res) => {
 const SignupUser = async (req, res) => {
   try {
     console.log("Received Signup Data:", req.body);
-
-    if (!req.body.roleId) {
-      return res.status(400).json({ message: "roleId is required" });
-    }
-
     const salt = bcrypt.genSaltSync(10);
     const hashedPassword = bcrypt.hashSync(req.body.password, salt);
     req.body.password = hashedPassword;
@@ -71,7 +66,7 @@ const SignupUser = async (req, res) => {
       name: req.body.name,
       email: req.body.email,
       password: req.body.password,
-      roleId: req.body.roleId,
+      roleId: req.body.role,
     });
 
     await mailutil.sendingMail(
@@ -80,7 +75,7 @@ const SignupUser = async (req, res) => {
       "This is Welcome Email"
     );
 
-    const populatedUser = await UserModel.findById(createdUser._id).populate("roleId");
+    const populatedUser = await UserModel.findById(createdUser._id);
 
     res.status(201).json({
       message: "User created successfully",
@@ -101,7 +96,7 @@ const LoginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const foundUser = await UserModel.findOne({ email }).populate("roleId");
+    const foundUser = await UserModel.findOne({ email });
     if (!foundUser) {
       return res.status(404).json({ message: "Email not found" });
     }

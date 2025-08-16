@@ -14,14 +14,15 @@ const UserSchema = new Schema(
     password: {
       type: String,
     },
-    roleId: {
-      type: Schema.Types.ObjectId,
-      ref: "role",
+    role: {
+      type: String,
+      enum: ["Admin", "User"],
+      default: "User",
     },
-    is_active:{
-      type:Boolean,
-      default:true
-    }
+    is_active: {
+      type: Boolean,
+      default: true,
+    },
   },
   {
     timestamps: true,
