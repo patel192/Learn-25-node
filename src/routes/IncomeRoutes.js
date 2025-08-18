@@ -4,5 +4,5 @@ routes.post("/income",IncomeController.AddIncome)
 routes.get("/incomes",IncomeController.GetAllincome)
 routes.delete("/income/:id",IncomeController.DeleteIncome)
 routes.get("/income/:id",IncomeController.GetIncomebyID)
-routes.get("/incomesbyUserID/:id",IncomeController.GetIncomebyUserID)
+routes.get("/incomesbyUserID/:userId",IncomeController.GetIncomebyUserID)
 module.exports = routes;

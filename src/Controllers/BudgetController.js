@@ -53,7 +53,7 @@ const DeleteBudget = async (req, res) => {
 const GetBudgetbyUserID = async (req, res) => {
   try {
     const BudgetbyUserID = await BudgetModel.find({
-      userID: req.params.id,
+      userID: req.params.userId,
     }).populate("userID categoryID");
     if (BudgetbyUserID.length === 0) {
       res.status(404).json({

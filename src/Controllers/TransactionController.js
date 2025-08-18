@@ -55,7 +55,7 @@ const DeleteTransaction = async (req, res) => {
 const TransactionByUserId = async (req, res) => {
   try {
     const Transactions = await TransactionModel.find({
-      userID: req.params.userID,
+      userID: req.params.userId,
     });
     res.status(200).json({
       message: "Transactions Fetched Successfully",

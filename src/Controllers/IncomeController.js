@@ -53,7 +53,7 @@ const DeleteIncome = async (req, res) => {
 const GetIncomebyUserID = async (req, res) => {
   try {
     const IncomebyUserID = await IncomeModel.find({
-      userID: req.params.id,
+      userID: req.params.userId,
     }).populate("userID");
     if (IncomebyUserID.length === 0) {
       res.status(404).json({

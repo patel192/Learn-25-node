@@ -52,19 +52,14 @@ const DeleteBill = async (req, res) => {
 };
 const GetBillbyUserID = async (req, res) => {
   try {
-    const BillbyUserID = await BudgetModel.find({
-      userID: req.params.id,
+    const BillbyUserID = await BillModel.find({
+      userID: req.params.userId,
     }).populate("userID");
-    if (BillbyUserID.length === 0) {
-      res.status(404).json({
-        message: "No Bills Found",
-      });
-    } else {
-      res.status(200).json({
-        message: "Bill Found Successfully",
-        data: BillbyUserID,
-      });
-    }
+
+    res.status(200).json({
+      message: "Bill Found Successfully",
+      data: BillbyUserID,
+    });
   } catch (error) {
     res.status(500).json({
       message: error.message,
