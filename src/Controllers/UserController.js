@@ -3,19 +3,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const mailutil = require("../utiles/MailUtil");
 const secret = "secret";
-const Adduser = async (req, res) => {
-  try {
-    const AddedUser = await UserModel.create(req.body);
-    res.status(201).json({
-      message: "the user is created successfully",
-      data: AddedUser,
-    });
-  } catch (err) {
-    res.status(500).json({
-      message: err.message,
-    });
-  }
-};
+
 const GetAllusers = async (req, res) => {
   try {
     const Allusers = await UserModel.find();
@@ -66,7 +54,7 @@ const SignupUser = async (req, res) => {
       name: req.body.name,
       email: req.body.email,
       password: req.body.password,
-      roleId: req.body.role,
+      role: req.body.role,
     });
 
     await mailutil.sendingMail(
@@ -186,7 +174,6 @@ const UpdateUser = async (req, res) => {
 
 
 module.exports = {
-  Adduser,
   GetAllusers,
   GetuserbyId,
   DeleteUser,
