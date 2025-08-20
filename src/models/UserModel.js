@@ -19,6 +19,13 @@ const UserSchema = new Schema(
       enum: ["Admin", "User"],
       default: "User",
     },
+    profilePic:{
+      type:String,
+      default:""
+    },
+    bio:{
+      type:String
+    },
     is_active: {
       type: Boolean,
       default: true,
