@@ -14,7 +14,7 @@ const AddTransaction = async (req, res) => {
 };
 const GetAlltransaction = async (req, res) => {
   try {
-    const AllTransaction = await TransactionModel.find();
+    const AllTransaction = await TransactionModel.find().populate("userID");
     res.status(200).json({
       message: "the Transactions fetched successfully",
       data: AllTransaction,
