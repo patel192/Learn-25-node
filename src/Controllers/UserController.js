@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken");
 const mailutil = require("../utiles/MailUtil");
 const secret = "secret";
 
+
 const GetAllusers = async (req, res) => {
   try {
     const Allusers = await UserModel.find();
@@ -90,12 +91,24 @@ const LoginUser = async (req, res) => {
     if (!isMatch) {
       return res.status(401).json({ message: "Invalid credentials" });
     }
-
+    // generated token for the user
+    const token = jwt.sign(
+      {
+        id: foundUser._id,
+        role: foundUser.role || "User",
+      },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "1h",
+      }
+    );
+    const { password: _, ...userData } = foundUser.toObject();
     res.status(200).json({
       message: "Login success",
-      data: foundUser,
+      token,
+      data: userData,
     });
-  } catch (err) {
+  } catch (err) { 
     res.status(500).json({
       message: "Error logging in",
       error: err.message,
@@ -171,7 +184,6 @@ const UpdateUser = async (req, res) => {
     });
   }
 };
-
 
 module.exports = {
   GetAllusers,

@@ -15,6 +15,7 @@ const adminReportRoutes = require("./src/routes/AdminReportRoutes")
 const systemlogRoutes = require("./src/routes/SystemlogRoutes")
 const recurringExpensesRoutes = require("./src/routes/RecurringExpensesRoutes")
 const billRoutes = require("./src/routes/BillRoutes")
+require("dotenv").config();
 app.use("/api",categoryRoutes)
 app.use("/api",userRoutes)
 app.use("/api",expenseRoutes)
