@@ -1,9 +1,11 @@
 const routes = require("express").Router()
 const Expensecontroller = require("../Controllers/ExepenseController")
-routes.post("/expense",Expensecontroller.AddExpense)
-routes.get("/expenses",Expensecontroller.GetAllExpenses)
-routes.delete("/expense/:id",Expensecontroller.DeleteExpense)
-routes.get("/expense/:id",Expensecontroller.GetExpensebyID)
-routes.get("/expensesbyUserID/:userId",Expensecontroller.GetExpensebyUserId)
-routes.get("/recent-expense/:userId",Expensecontroller.GetRecentExpenses)
+const authMiddleware = require("../middleware/authMiddleware");
+const isAdmin = require("../middleware/isAdmin")
+routes.post("/expense",authMiddleware,Expensecontroller.AddExpense)
+routes.get("/expenses",authMiddleware,Expensecontroller.GetAllExpenses)
+routes.delete("/expense/:id",authMiddleware,Expensecontroller.DeleteExpense)
+routes.get("/expense/:id",authMiddleware,Expensecontroller.GetExpensebyID)
+routes.get("/expensesbyUserID/:userId",authMiddleware,Expensecontroller.GetExpensebyUserId)
+routes.get("/recent-expense/:userId",authMiddleware,Expensecontroller.GetRecentExpenses)
 module.exports = routes;

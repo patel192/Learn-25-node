@@ -1,8 +1,9 @@
 const route = require("express").Router();
 const RecurringExpensesController = require("../Controllers/RecurringExpensesController");
-route.post("/recurring", RecurringExpensesController.AddRecurringExpense);
+const authMiddleware = require("../middleware/authMiddleware");
+route.post("/recurring",authMiddleware, RecurringExpensesController.AddRecurringExpense);
 route.get(
-  "/recurring/:userId",
+  "/recurring/:userId",authMiddleware,
   RecurringExpensesController.RecurringExpenseByUserId
 );
 module.exports = route;

@@ -1,6 +1,6 @@
 const routes = require("express").Router()
-const authMiddleware = require("../middleware/authMiddleware")
 const TransactionController = require("../Controllers/TransactionController")
+const authMiddleware = require("../middleware/authMiddleware");
 routes.post("/transaction",authMiddleware,TransactionController.AddTransaction)
 routes.get("/transactions",authMiddleware,TransactionController.GetAlltransaction)
 routes.get("/transaction/:id",authMiddleware,TransactionController.GettransactionbyID)
