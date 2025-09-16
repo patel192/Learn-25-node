@@ -26,9 +26,17 @@ app.use("/api",adminReportRoutes)
 app.use("/api",systemlogRoutes)
 app.use("/api",recurringExpensesRoutes)
 app.use("/api",billRoutes)
-mongoose.connect("mongodb://localhost:27017").then(()=>{
-    console.log("database connected...")
+mongoose.connect(process.env.MONGO_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
 })
+.then(() => {
+    console.log("✅ Database connected...");
+})
+.catch((err) => {
+    console.error("❌ Database connection error:", err);
+});
+
 const PORT = 3001
 app.listen(PORT,()=>{
     console.log("server started on port number",PORT)
