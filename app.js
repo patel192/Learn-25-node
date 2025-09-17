@@ -3,16 +3,26 @@ const mongoose = require("mongoose")
 const cors = require("cors")
 const app = express()
 app.use(express.json())
-app.use(cors({
-  origin: "https://expense-manager-frontend-sw2e-24ndkmmvi.vercel.app", // your frontend domain
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-  credentials: true,
-}));
+const allowedOrigins = [
+  "https://expense-manager-frontend-sw2e.vercel.app",
+  "https://expense-manager-frontend-sw2e-24ndkmmvi.vercel.app", // old one, just in case
+  "http://localhost:5173", // for local dev
+];
 
-// Handle preflight requests
-app.options("*", cors());
-
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      // allow requests with no origin (like Postman, curl)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,
+  })
+);
 const userRoutes = require("./src/routes/UserRoutes")
 const categoryRoutes = require("./src/routes/CategoryRoutes")
 const expenseRoutes = require("./src/routes/ExpenseRoutes")
