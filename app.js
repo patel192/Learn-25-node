@@ -4,9 +4,14 @@ const cors = require("cors")
 const app = express()
 app.use(express.json())
 app.use(cors({
-  origin: "*"
+  origin: "https://expense-manager-frontend-sw2e-24ndkmmvi.vercel.app", // your frontend domain
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true,
 }));
 
+// Handle preflight requests
+app.options("*", cors());
 
 const userRoutes = require("./src/routes/UserRoutes")
 const categoryRoutes = require("./src/routes/CategoryRoutes")
