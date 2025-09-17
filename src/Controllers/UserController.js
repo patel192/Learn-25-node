@@ -2,73 +2,77 @@ const UserModel = require("../models/UserModel");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const mailutil = require("../utiles/MailUtil");
-const secret = "secret";
 
+const secret = process.env.JWT_SECRET;
 
+// ===================== Get All Users =====================
 const GetAllusers = async (req, res) => {
   try {
     const Allusers = await UserModel.find();
     res.status(200).json({
-      message: "the users found successfully",
+      message: "Users found successfully",
       data: Allusers,
     });
   } catch (err) {
-    res.status(404).json({
-      message: err.message,
-    });
+    res.status(500).json({ message: err.message });
   }
 };
+
+// ===================== Get User by ID =====================
 const GetuserbyId = async (req, res) => {
   try {
     const UserbyID = await UserModel.findById(req.params.id);
+    if (!UserbyID) return res.status(404).json({ message: "User not found" });
     res.status(200).json({
-      message: "the user found successfully",
+      message: "User found successfully",
       data: UserbyID,
     });
   } catch (err) {
-    res.status(404).json({
-      message: err.message,
-    });
+    res.status(500).json({ message: err.message });
   }
 };
+
+// ===================== Delete User =====================
 const DeleteUser = async (req, res) => {
   try {
     const Deleteduser = await UserModel.findByIdAndDelete(req.params.id);
-    res.status(200).json({
-      message: "the user deleted successfully",
-    });
+    if (!Deleteduser) return res.status(404).json({ message: "User not found" });
+    res.status(200).json({ message: "User deleted successfully" });
   } catch (err) {
-    res.status(404).json({
-      message: err.message,
-    });
+    res.status(500).json({ message: err.message });
   }
 };
+
+// ===================== Signup User =====================
 const SignupUser = async (req, res) => {
   try {
     console.log("Received Signup Data:", req.body);
+
     const salt = bcrypt.genSaltSync(10);
     const hashedPassword = bcrypt.hashSync(req.body.password, salt);
-    req.body.password = hashedPassword;
 
-    // Save user with roleId
     const createdUser = await UserModel.create({
       name: req.body.name,
       email: req.body.email,
-      password: req.body.password,
-      role: req.body.role,
+      password: hashedPassword,
+      role: req.body.role || "User",
     });
 
+    // Send welcome email
     await mailutil.sendingMail(
       createdUser.email,
       "Welcome to Expense Manager",
-      "This is Welcome Email"
+      "<p>Welcome! Your account has been created successfully 🎉</p>"
     );
-
-    const populatedUser = await UserModel.findById(createdUser._id);
 
     res.status(201).json({
       message: "User created successfully",
-      data: populatedUser,
+      data: {
+        _id: createdUser._id,
+        name: createdUser.name,
+        email: createdUser.email,
+        role: createdUser.role,
+      },
     });
   } catch (err) {
     console.error(err);
@@ -78,6 +82,8 @@ const SignupUser = async (req, res) => {
     });
   }
 };
+
+// ===================== Login User =====================
 const LoginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -91,82 +97,86 @@ const LoginUser = async (req, res) => {
     if (!isMatch) {
       return res.status(401).json({ message: "Invalid credentials" });
     }
-    // generated token for the user
+
     const token = jwt.sign(
-      {
-        id: foundUser._id,
-        role: foundUser.role || "User",
-      },
-      process.env.JWT_SECRET,
-      {
-        expiresIn: "1h",
-      }
+      { id: foundUser._id, role: foundUser.role || "User" },
+      secret,
+      { expiresIn: "1h" }
     );
+
     const { password: _, ...userData } = foundUser.toObject();
+
     res.status(200).json({
-      message: "Login success",
+      message: "Login successful",
       token,
       data: userData,
     });
-  } catch (err) { 
-    res.status(500).json({
-      message: "Error logging in",
-      error: err.message,
-    });
+  } catch (err) {
+    res.status(500).json({ message: "Error logging in", error: err.message });
   }
 };
+
+// ===================== Forgot Password =====================
 const ForgotPassword = async (req, res) => {
-  console.log(req.body.email);
-  const email = req.body.email;
-  const founduser = await UserModel.findOne({ email: email });
-  if (founduser) {
-    const token = jwt.sign(founduser.toObject(), secret);
-    console.log(token);
-    const url = `http://localhost:5173/resetpassword/${token}`;
-    const mailcontent = `<html>
-    <a href="${url}">reset paasword</a>
-    </html>`;
-    await mailutil.sendingMail(founduser.email, "reset password", mailcontent);
-    res.json({
-      message: "reset password link sended to the email",
-    });
-  } else {
-    res.json({
-      message: "user not found please register first",
-    });
+  try {
+    const { email } = req.body;
+    const foundUser = await UserModel.findOne({ email });
+
+    if (!foundUser) {
+      return res
+        .status(404)
+        .json({ message: "User not found, please register first" });
+    }
+
+    const token = jwt.sign(
+      { _id: foundUser._id, email: foundUser.email },
+      secret,
+      { expiresIn: "15m" } // reset token expires in 15 minutes
+    );
+
+    const url = `https://expense-manager-frontend-sw2e.vercel.app/resetpassword/${token}`;
+    const mailcontent = `<html><p>Click below to reset your password:</p><a href="${url}">Reset Password</a></html>`;
+
+    await mailutil.sendingMail(foundUser.email, "Reset Password", mailcontent);
+
+    res.json({ message: "Reset password link sent to your email" });
+  } catch (err) {
+    res
+      .status(500)
+      .json({ message: "Error sending reset password email", error: err.message });
   }
 };
+
+// ===================== Reset Password =====================
 const Resetpassword = async (req, res) => {
-  const token = req.body.token; //decode --> email | id
-  const newPassword = req.body.password;
+  try {
+    const { token, password } = req.body;
+    const userFromToken = jwt.verify(token, secret);
 
-  const userFromToken = jwt.verify(token, secret);
-  //object -->email,id..
-  //password encrypt...
-  const salt = bcrypt.genSaltSync(10);
-  const hashedPassword = bcrypt.hashSync(newPassword, salt);
+    const salt = bcrypt.genSaltSync(10);
+    const hashedPassword = bcrypt.hashSync(password, salt);
 
-  const updatedUser = await UserModel.findByIdAndUpdate(userFromToken._id, {
-    password: hashedPassword,
-  });
-  res.status(200).json({
-    message: "password updated successfully..",
-  });
+    await UserModel.findByIdAndUpdate(userFromToken._id, {
+      password: hashedPassword,
+    });
+
+    res.status(200).json({ message: "Password updated successfully" });
+  } catch (err) {
+    res
+      .status(400)
+      .json({ message: "Invalid or expired token", error: err.message });
+  }
 };
 
+// ===================== Update User =====================
 const UpdateUser = async (req, res) => {
   try {
     const { name, email, bio, profilePic } = req.body;
 
     const updatedUser = await UserModel.findByIdAndUpdate(
       req.params.id,
-      {
-        name,
-        email,
-        bio,
-        profilePic, // <-- save Cloudinary URL if provided
-      },
-      { new: true } // return updated doc
+      { name, email, bio, profilePic },
+      { new: true }
     );
 
     if (!updatedUser) {
@@ -178,10 +188,7 @@ const UpdateUser = async (req, res) => {
       data: updatedUser,
     });
   } catch (err) {
-    res.status(500).json({
-      message: "Error updating user",
-      error: err.message,
-    });
+    res.status(500).json({ message: "Error updating user", error: err.message });
   }
 };
 
