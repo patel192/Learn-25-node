@@ -5,7 +5,8 @@ const app = express()
 app.use(express.json())
 const allowedOrigins = [
   "https://expense-manager-frontend-sw2e.vercel.app",
-  "https://expense-manager-frontend-sw2e-24ndkmmvi.vercel.app", // old one, just in case
+  "https://expense-manager-frontend-sw2e-24ndkmmvi.vercel.app",
+  "https://expense-manager-frontend-byfrj6jle.vercel.app",
   "http://localhost:5173", // for local dev
 ];
 

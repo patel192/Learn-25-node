@@ -148,25 +148,35 @@ const ForgotPassword = async (req, res) => {
 };
 
 // ===================== Reset Password =====================
-const Resetpassword = async (req, res) => {
+const ResetPassword = async (req, res) => {
   try {
     const { token, password } = req.body;
-    const userFromToken = jwt.verify(token, secret);
 
+    if (!token || !password) {
+      return res.status(400).json({ message: "Token and password are required" });
+    }
+
+    // Verify token
+    const decoded = jwt.verify(token, secret); // secret from env
+    const userId = decoded._id;
+
+    // Hash new password
     const salt = bcrypt.genSaltSync(10);
     const hashedPassword = bcrypt.hashSync(password, salt);
 
-    await UserModel.findByIdAndUpdate(userFromToken._id, {
-      password: hashedPassword,
-    });
+    // Update user password
+    await UserModel.findByIdAndUpdate(userId, { password: hashedPassword });
 
     res.status(200).json({ message: "Password updated successfully" });
   } catch (err) {
-    res
-      .status(400)
-      .json({ message: "Invalid or expired token", error: err.message });
+    console.error("ResetPassword Error:", err);
+    res.status(500).json({
+      message: "Error resetting password",
+      error: err.message,
+    });
   }
 };
+
 
 // ===================== Update User =====================
 const UpdateUser = async (req, res) => {
@@ -199,6 +209,6 @@ module.exports = {
   SignupUser,
   LoginUser,
   ForgotPassword,
-  Resetpassword,
+  ResetPassword,
   UpdateUser,
 };
