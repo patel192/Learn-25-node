@@ -3,23 +3,10 @@ const mongoose = require("mongoose")
 const cors = require("cors")
 const app = express()
 app.use(express.json())
-const allowedOrigins = "expense-manager-frontend-sw2e-pgujcrqo7.vercel.app" 
-;
+app.use(cors({
+  origin: "*"
+}));
 
-app.use(
-  cors({
-    origin: function (origin, callback) {
-      // allow requests with no origin (like Postman, curl)
-      if (!origin) return callback(null, true);
-      if (allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
-    credentials: true,
-  })
-);
 const userRoutes = require("./src/routes/UserRoutes")
 const categoryRoutes = require("./src/routes/CategoryRoutes")
 const expenseRoutes = require("./src/routes/ExpenseRoutes")
