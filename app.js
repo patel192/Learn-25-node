@@ -3,9 +3,29 @@ const mongoose = require("mongoose")
 const cors = require("cors")
 const app = express()
 app.use(express.json())
-app.use(cors({
-  origin: "*"
-}));
+const allowedOrigins = [
+  "https://expense-manager-frontend-sw2e.vercel.app", // production domain
+];
+
+// CORS middleware
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      if (!origin) return callback(null, true); // allow Postman & server-to-server
+
+      if (
+        allowedOrigins.includes(origin) ||
+        (typeof origin === "string" && /\.vercel\.app$/.test(origin)) // allow all vercel preview deployments
+      ) {
+        callback(null, true);
+      } else {
+        console.log("❌ Blocked by CORS:", origin);
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,
+  })
+);
 
 const userRoutes = require("./src/routes/UserRoutes")
 const categoryRoutes = require("./src/routes/CategoryRoutes")
