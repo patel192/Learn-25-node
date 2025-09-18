@@ -3,11 +3,7 @@ const mongoose = require("mongoose")
 const cors = require("cors")
 const app = express()
 app.use(express.json())
-const allowedOrigins = [
-  "https://expense-manager-frontend-sw2e.vercel.app",
-  "https://expense-manager-frontend-sw2e-24ndkmmvi.vercel.app",
-  "https://expense-manager-frontend-byfrj6jle.vercel.app",
-  "http://localhost:5173", // for local dev
+const allowedOrigins = ["expense-manager-frontend-sw2e-pgujcrqo7.vercel.app" 
 ];
 
 app.use(

@@ -1,8 +1,6 @@
 const UserModel = require("../models/UserModel");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const mailutil = require("../utiles/MailUtil");
-
 const secret = process.env.JWT_SECRET;
 
 // ===================== Get All Users =====================
@@ -57,14 +55,6 @@ const SignupUser = async (req, res) => {
       password: hashedPassword,
       role: req.body.role || "User",
     });
-
-    // Send welcome email
-    await mailutil.sendingMail(
-      createdUser.email,
-      "Welcome to Expense Manager",
-      "<p>Welcome! Your account has been created successfully 🎉</p>"
-    );
-
     res.status(201).json({
       message: "User created successfully",
       data: {
@@ -115,69 +105,6 @@ const LoginUser = async (req, res) => {
     res.status(500).json({ message: "Error logging in", error: err.message });
   }
 };
-
-// ===================== Forgot Password =====================
-const ForgotPassword = async (req, res) => {
-  try {
-    const { email } = req.body;
-    const foundUser = await UserModel.findOne({ email });
-
-    if (!foundUser) {
-      return res
-        .status(404)
-        .json({ message: "User not found, please register first" });
-    }
-
-    const token = jwt.sign(
-      { _id: foundUser._id, email: foundUser.email },
-      secret,
-      { expiresIn: "15m" } // reset token expires in 15 minutes
-    );
-
-    const url = `https://expense-manager-frontend-sw2e.vercel.app/resetpassword/${token}`;
-    const mailcontent = `<html><p>Click below to reset your password:</p><a href="${url}">Reset Password</a></html>`;
-
-    await mailutil.sendingMail(foundUser.email, "Reset Password", mailcontent);
-
-    res.json({ message: "Reset password link sent to your email" });
-  } catch (err) {
-    res
-      .status(500)
-      .json({ message: "Error sending reset password email", error: err.message });
-  }
-};
-
-// ===================== Reset Password =====================
-const ResetPassword = async (req, res) => {
-  try {
-    const { token, password } = req.body;
-
-    if (!token || !password) {
-      return res.status(400).json({ message: "Token and password are required" });
-    }
-
-    // Verify token
-    const decoded = jwt.verify(token, secret); // secret from env
-    const userId = decoded._id;
-
-    // Hash new password
-    const salt = bcrypt.genSaltSync(10);
-    const hashedPassword = bcrypt.hashSync(password, salt);
-
-    // Update user password
-    await UserModel.findByIdAndUpdate(userId, { password: hashedPassword });
-
-    res.status(200).json({ message: "Password updated successfully" });
-  } catch (err) {
-    console.error("ResetPassword Error:", err);
-    res.status(500).json({
-      message: "Error resetting password",
-      error: err.message,
-    });
-  }
-};
-
-
 // ===================== Update User =====================
 const UpdateUser = async (req, res) => {
   try {
@@ -208,7 +135,5 @@ module.exports = {
   DeleteUser,
   SignupUser,
   LoginUser,
-  ForgotPassword,
-  ResetPassword,
   UpdateUser,
 };
