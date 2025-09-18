@@ -7,7 +7,7 @@ const isAdmin = require("../middleware/isAdmin")
 routes.post("/user", UserController.SignupUser);
 routes.post("/user/login", UserController.LoginUser);
 routes.post("/user/forgotpassword", UserController.ForgotPassword);
-routes.post("/user/resetpassword", UserController.Resetpassword);
+routes.post("/user/resetpassword", UserController.ResetPassword);
 
 // 🔒 Protected routes
 routes.get("/users", authMiddleware,isAdmin, UserController.GetAllusers);
