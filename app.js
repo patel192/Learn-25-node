@@ -4,7 +4,8 @@ const cors = require("cors")
 const app = express()
 app.use(express.json())
 const allowedOrigins = [
-  "https://expense-manager-frontend-sw2e.vercel.app", // production domain
+  "https://expense-manager-frontend-sw2e.vercel.app",
+  "http://localhost:5173" // production domain
 ];
 
 // CORS middleware
