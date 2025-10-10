@@ -1,22 +1,28 @@
-const express = require("express")
-const mongoose = require("mongoose")
-const cors = require("cors")
-const app = express()
-app.use(express.json())
+const express = require("express");
+const mongoose = require("mongoose");
+const cors = require("cors");
+require("dotenv").config();
+
+const app = express();
+app.use(express.json());
+
+// ✅ Allowed origins for both local & production
 const allowedOrigins = [
-  "https://expense-manager-frontend-sw2e.vercel.app",
-  "http://localhost:5173" // production domain
+  "http://localhost:5173", // local development
+  "https://expense-manager-frontend-sw2e.vercel.app", // production domain
 ];
 
-// CORS middleware
+// ✅ CORS setup
 app.use(
   cors({
     origin: function (origin, callback) {
-      if (!origin) return callback(null, true); // allow Postman & server-to-server
+      if (!origin) return callback(null, true); // allow Postman or server-to-server requests
 
+      // Allow localhost and vercel preview deployments
       if (
         allowedOrigins.includes(origin) ||
-        (typeof origin === "string" && /\.vercel\.app$/.test(origin)) // allow all vercel preview deployments
+        origin.startsWith("http://localhost") ||
+        /\.vercel\.app$/.test(origin)
       ) {
         callback(null, true);
       } else {
@@ -28,37 +34,42 @@ app.use(
   })
 );
 
-const userRoutes = require("./src/routes/UserRoutes")
-const categoryRoutes = require("./src/routes/CategoryRoutes")
-const expenseRoutes = require("./src/routes/ExpenseRoutes")
-const incomeRoutes = require("./src/routes/IncomeRoutes")
-const transactionRoutes = require("./src/routes/TransactionRoutes")
-const budgetroutes = require("./src/routes/BudgetRoutes")
-const adminReportRoutes = require("./src/routes/AdminReportRoutes")
-const systemlogRoutes = require("./src/routes/SystemlogRoutes")
-const recurringExpensesRoutes = require("./src/routes/RecurringExpensesRoutes")
-const billRoutes = require("./src/routes/BillRoutes")
-require("dotenv").config();
-app.use("/api",categoryRoutes)
-app.use("/api",userRoutes)
-app.use("/api",expenseRoutes)
-app.use("/api",incomeRoutes)
-app.use("/api",transactionRoutes)
-app.use("/api",budgetroutes)
-app.use("/api",adminReportRoutes)
-app.use("/api",systemlogRoutes)
-app.use("/api",recurringExpensesRoutes)
-app.use("/api",billRoutes)
-mongoose.connect(process.env.MONGO_URI, {
-})
-.then(() => {
-    console.log("✅ Database connected...");
-})
-.catch((err) => {
-    console.error("❌ Database connection error:", err);
-});
+// ✅ Import routes
+const userRoutes = require("./src/routes/UserRoutes");
+const categoryRoutes = require("./src/routes/CategoryRoutes");
+const expenseRoutes = require("./src/routes/ExpenseRoutes");
+const incomeRoutes = require("./src/routes/IncomeRoutes");
+const transactionRoutes = require("./src/routes/TransactionRoutes");
+const budgetRoutes = require("./src/routes/BudgetRoutes");
+const adminReportRoutes = require("./src/routes/AdminReportRoutes");
+const systemlogRoutes = require("./src/routes/SystemlogRoutes");
+const recurringExpensesRoutes = require("./src/routes/RecurringExpensesRoutes");
+const billRoutes = require("./src/routes/BillRoutes");
 
-const PORT = process.env.PORT || 3001
-app.listen(PORT,()=>{
-    console.log("server started on port number",PORT)
-})
+// ✅ Use routes with prefix
+app.use("/api", categoryRoutes);
+app.use("/api", userRoutes);
+app.use("/api", expenseRoutes);
+app.use("/api", incomeRoutes);
+app.use("/api", transactionRoutes);
+app.use("/api", budgetRoutes);
+app.use("/api", adminReportRoutes);
+app.use("/api", systemlogRoutes);
+app.use("/api", recurringExpensesRoutes);
+app.use("/api", billRoutes);
+
+// ✅ Database connection
+mongoose
+  .connect(process.env.MONGO_URI)
+  .then(() => {
+    console.log("✅ Database connected...");
+  })
+  .catch((err) => {
+    console.error("❌ Database connection error:", err);
+  });
+
+// ✅ Start server
+const PORT = process.env.PORT || 3001;
+app.listen(PORT, () => {
+  console.log(`🚀 Server started on port ${PORT}`);
+});
