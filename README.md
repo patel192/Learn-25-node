@@ -81,74 +81,85 @@ arduino
 http://localhost:5000
 ```
 
-🔗 API Endpoints (Example)
-Endpoint names may vary based on implementation.
+## 🔗 API Endpoints (Example)
 
-Method	Endpoint	Description
-GET	/api/expenses	Fetch all expenses
-POST	/api/expenses	Add a new expense
-PUT	/api/expenses/:id	Update an expense
-DELETE	/api/expenses/:id	Delete an expense
+> Endpoint names may vary based on implementation.
 
-All endpoints accept and return JSON.
+| Method | Endpoint              | Description            |
+|------|------------------------|------------------------|
+| GET  | /api/expenses          | Fetch all expenses     |
+| POST | /api/expenses          | Add a new expense      |
+| PUT  | /api/expenses/:id      | Update an expense      |
+| DELETE | /api/expenses/:id    | Delete an expense      |
 
-🔐 Environment Variables
-Variable	Description
-PORT	Server port
-MONGO_URI	MongoDB connection string
+All endpoints accept and return **JSON**.
 
-🌐 Frontend Integration
-This backend is designed to work with a frontend application (React/Vite).
-The frontend communicates with the backend using HTTP requests (fetch or axios).
+---
 
-Ensure:
+## 🔐 Environment Variables
 
-Correct API base URL is configured in the frontend
+| Variable    | Description                   |
+|------------|-------------------------------|
+| PORT       | Server port                   |
+| MONGO_URI  | MongoDB connection string     |
 
-CORS is enabled on the backend
+---
 
-🧪 Testing
+## 🌐 Frontend Integration
+
+This backend is designed to work with a frontend application built using **React / Vite**.  
+The frontend communicates with the backend using **HTTP requests** (`fetch` or `axios`).
+
+### Ensure the following:
+- Correct API base URL is configured in the frontend
+- CORS is enabled on the backend
+
+---
+
+## 🧪 Testing
+
 You can test the API using:
 
-Postman
+- Postman  
+- Thunder Client (VS Code extension)
 
-Thunder Client (VS Code extension)
+Send **JSON payloads** to the defined routes to verify responses.
 
-Test endpoints by sending JSON payloads to the defined routes.
+---
 
-💡 Possible Enhancements
-Future improvements can include:
+## 💡 Possible Enhancements
 
-User authentication (JWT)
+Future improvements may include:
 
-Expense categories & analytics
+- User authentication (JWT)
+- Expense categories and analytics
+- Input validation
+- Pagination and filtering
+- Role-based access
+- Improved logging and error handling
 
-Input validation
+---
 
-Pagination and filtering
+## 📌 Purpose of This Project
 
-Role-based access
-
-Logging and error handling improvements
-
-📌 Purpose of This Project
 This project was built to:
 
-Practice backend development with Node.js
+- Practice backend development with Node.js
+- Understand REST API design principles
+- Work with databases and data models
+- Connect backend services with a frontend UI
 
-Understand REST API design
+---
 
-Work with databases and data models
+## 📞 Contact
 
-Connect backend services with a frontend UI
-
-📞 Contact
 For questions or collaboration:
 
-GitHub: https://github.com/patel192
+- **GitHub:** https://github.com/patel192  
+- **LinkedIn:** https://www.linkedin.com/in/patel-muhammad-658952355/
+- **Email:** patelmuhammad192@gmail.com
 
-LinkedIn: https://www.linkedin.com/in/your-profile
+---
 
-Email: your-email@example.com
+⭐ This backend is part of a **full stack Expense Manager application**.
 
-⭐ This backend is part of a full stack Expense Manager application.
