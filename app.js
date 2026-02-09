@@ -6,19 +6,22 @@ require("dotenv").config();
 const app = express();
 app.use(express.json());
 
-// ✅ Allowed origins for both local & production
+// Health endpoint (for CI + monitoring)
+app.get("/health", (req, res) => {
+  res.status(200).json({ status: "ok" });
+});
+
+// CORS setup (unchanged)
 const allowedOrigins = [
-  "http://localhost:5173", // local development
-  "https://expense-manager-frontend-sw2e.vercel.app", // production domain
+  "http://localhost:5173",
+  "https://expense-manager-frontend-sw2e.vercel.app",
 ];
 
-// ✅ CORS setup
 app.use(
   cors({
     origin: function (origin, callback) {
-      if (!origin) return callback(null, true); // allow Postman or server-to-server requests
+      if (!origin) return callback(null, true);
 
-      // Allow localhost and vercel preview deployments
       if (
         allowedOrigins.includes(origin) ||
         origin.startsWith("http://localhost") ||
@@ -26,15 +29,14 @@ app.use(
       ) {
         callback(null, true);
       } else {
-        console.log("❌ Blocked by CORS:", origin);
         callback(new Error("Not allowed by CORS"));
       }
     },
     credentials: true,
-  })
+  }),
 );
 
-// ✅ Import routes
+// Routes (unchanged)
 const userRoutes = require("./src/routes/UserRoutes");
 const categoryRoutes = require("./src/routes/CategoryRoutes");
 const expenseRoutes = require("./src/routes/ExpenseRoutes");
@@ -46,7 +48,6 @@ const systemlogRoutes = require("./src/routes/SystemlogRoutes");
 const recurringExpensesRoutes = require("./src/routes/RecurringExpensesRoutes");
 const billRoutes = require("./src/routes/BillRoutes");
 
-// ✅ Use routes with prefix
 app.use("/api", categoryRoutes);
 app.use("/api", userRoutes);
 app.use("/api", expenseRoutes);
@@ -58,18 +59,13 @@ app.use("/api", systemlogRoutes);
 app.use("/api", recurringExpensesRoutes);
 app.use("/api", billRoutes);
 
-// ✅ Database connection
-mongoose
-  .connect(process.env.MONGO_URI)
-  .then(() => {
-    console.log("✅ Database connected...");
-  })
-  .catch((err) => {
-    console.error("❌ Database connection error:", err);
-  });
+// DB connection
+if (process.env.NODE_ENV !== "test") {
+  mongoose
+    .connect(process.env.MONGO_URI)
+    .then(() => console.log("DB connected"))
+    .catch((err) => console.error(err));
+}
 
-// ✅ Start server
-const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => {
-  console.log(`🚀 Server started on port ${PORT}`);
-});
+// EXPORT APP (important)
+module.exports = app;
