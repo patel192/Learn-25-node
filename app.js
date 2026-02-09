@@ -67,7 +67,11 @@ const mongoUri =
 
 mongoose
   .connect(mongoUri)
-  .then(() => console.log("DB connected"))
+  .then(() => {
+    if (process.env.NODE_ENV !== "test") {
+      console.log("DB connected");
+    }
+  })
   .catch((err) => console.error(err));
 
 // EXPORT APP (important)

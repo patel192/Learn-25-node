@@ -8,3 +8,11 @@ describe("GET /health", () => {
     expect(res.body).toEqual({ status: "ok" });
   });
 });
+
+const mongoose = require("mongoose");
+
+afterAll(async () => {
+  if (mongoose.connection.readyState !== 0) {
+    await mongoose.connection.close();
+  }
+});
