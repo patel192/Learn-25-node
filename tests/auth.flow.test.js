@@ -22,7 +22,7 @@ describe("Auth Flow", () => {
 
     expect(res.statusCode).toBe(201);
 
-    // Flexible extraction
+    // Flexible extraction depending on response shape
     userId = res.body.user?._id || res.body.data?._id || res.body._id;
     expect(userId).toBeDefined();
   });
@@ -50,15 +50,10 @@ describe("Auth Flow", () => {
   });
 
   afterAll(async () => {
-    await mongoose.connection.db.dropDatabase();
-    await mongoose.connection.close();
+    if (mongoose.connection.db) {
+      await mongoose.connection.db.dropDatabase();
+      await mongoose.connection.close();
+    }
   });
 
-});
-const mongoose = require("mongoose");
-
-afterAll(async () => {
-  if (mongoose.connection.readyState !== 0) {
-    await mongoose.connection.close();
-  }
 });
