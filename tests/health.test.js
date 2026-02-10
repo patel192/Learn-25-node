@@ -1,6 +1,6 @@
 const request = require("supertest");
 const app = require("../app");
-
+const mongoose = require("mongoose");
 describe("GET /health", () => {
   it("should return status 200 and status ok", async () => {
     const res = await request(app).get("/health");
