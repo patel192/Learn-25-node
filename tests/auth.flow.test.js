@@ -50,8 +50,11 @@ describe("Auth Flow", () => {
   });
 
   afterAll(async () => {
+  if (mongoose.connection.db) {
     await mongoose.connection.db.dropDatabase();
     await mongoose.connection.close();
-  });
+  }
+});
+
 
 });
