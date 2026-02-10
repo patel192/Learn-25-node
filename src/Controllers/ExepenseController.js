@@ -25,18 +25,33 @@ const GetAllExpenses = async (req,res) =>{
        })
     }
 }
-const DeleteExpense = async (req,res) => {
-    try{
-        const DeltedExpense = await ExpenseModel.findByIdAndDelete(req.params.id)
-        res.status(200).json({
-            message:"the expense is deleted successfully"
-        })
-    }catch(err){
-       res.status(404).json({
-        message:err.message
-       })
+const DeleteExpense = async (req, res) => {
+  try {
+
+    const expense = await ExpenseModel.findById(req.params.id);
+
+    if (!expense) {
+      return res.status(404).json({ message: "Expense not found" });
     }
-}
+
+    // Ownership check
+    if (expense.userID.toString() !== req.user.id) {
+      return res.status(403).json({
+        message: "You are not authorized to delete this expense"
+      });
+    }
+
+    await ExpenseModel.findByIdAndDelete(req.params.id);
+
+    res.status(200).json({
+      message: "Expense deleted successfully"
+    });
+
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
 const GetExpensebyID = async (req,res) => {
     try{
         const ExpensebyID = await ExpenseModel.findById(req.params.id)
