@@ -17,3 +17,10 @@ describe("Expense Routes Auth Protection", () => {
     expect(res.body.message).toMatch(/Invalid|expired/i);
   });
 });
+
+
+afterAll(async () => {
+  if (mongoose.connection && mongoose.connection.readyState !== 0) {
+    await mongoose.connection.close(true);
+  }
+});

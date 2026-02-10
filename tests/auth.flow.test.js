@@ -49,12 +49,10 @@ describe("Auth Flow", () => {
     expect(res.statusCode).toBe(200);
   });
 
-  afterAll(async () => {
-  if (mongoose.connection.db) {
-    await mongoose.connection.db.dropDatabase();
-    await mongoose.connection.close();
-  }
 });
 
-
+afterAll(async () => {
+  if (mongoose.connection && mongoose.connection.readyState !== 0) {
+    await mongoose.connection.close(true);
+  }
 });

@@ -1,7 +1,12 @@
 const mongoose = require("mongoose");
 
 module.exports = async () => {
-  if (mongoose.connection.readyState !== 0) {
-    await mongoose.connection.close();
+  // Close any open mongoose connection
+  if (mongoose.connection && mongoose.connection.readyState !== 0) {
+    try {
+      await mongoose.connection.close(true);
+    } catch (e) {
+      // no-op
+    }
   }
 };
