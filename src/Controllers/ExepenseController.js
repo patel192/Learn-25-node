@@ -51,6 +51,36 @@ const DeleteExpense = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+const UpdateExpense = async (req, res) => {
+  try {
+    const expense = await ExpenseModel.findById(req.params.id);
+
+    if (!expense) {
+      return res.status(404).json({ message: "Expense not found" });
+    }
+
+    // Ownership check
+    if (expense.userID.toString() !== req.user.id) {
+      return res.status(403).json({
+        message: "You are not authorized to update this expense"
+      });
+    }
+
+    const updatedExpense = await ExpenseModel.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true }
+    );
+
+    res.status(200).json({
+      message: "Expense updated successfully",
+      data: updatedExpense
+    });
+
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
 
 const GetExpensebyID = async (req,res) => {
     try{
@@ -101,5 +131,5 @@ const GetRecentExpenses = async (req,res) => {
   }
 }
 module.exports = {
-    AddExpense,GetAllExpenses,DeleteExpense,GetExpensebyID,GetExpensebyUserId,GetRecentExpenses
+    AddExpense,GetAllExpenses,DeleteExpense,UpdateExpense,GetExpensebyID,GetExpensebyUserId,GetRecentExpenses
 }
