@@ -51,8 +51,3 @@ describe("Auth Flow", () => {
 
 });
 
-afterAll(async () => {
-  if (mongoose.connection && mongoose.connection.readyState !== 0) {
-    await mongoose.connection.close(true);
-  }
-});

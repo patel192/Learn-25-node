@@ -65,12 +65,6 @@ describe("Update Expense Flow", () => {
     expect(res.body.data.amount).toBe(999);
     expect(res.body.data.description).toBe("After update");
   });
-
-  afterAll(async () => {
-    if (mongoose.connection.readyState !== 0) {
-      await mongoose.connection.db.dropDatabase();
-      await mongoose.connection.close();
-    }
-  });
-
 });
+
+

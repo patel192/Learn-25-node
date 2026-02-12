@@ -49,10 +49,6 @@ describe("Delete Expense Authrization", () => {
     const res = await request(app).delete(`/api/expense/${expenseId}`).set("Authorization", `Bearer ${token}`);
     expect(res.statusCode).toBe(200);
   });
-  afterAll(async () => {
-     if(mongoose.connection.readyState !== 0){
-        await mongoose.connection.db.dropDatabase();
-        await mongoose.connection.close();
-     }
-  });
 })
+
+

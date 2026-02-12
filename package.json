@@ -3,9 +3,10 @@
   "version": "1.0.0",
   "main": "app.js",
   "scripts": {
-    "test": "cross-env NODE_ENV=test jest",
-    "start": "node server.js"
-  },
+  "test": "cross-env NODE_ENV=test jest --runInBand --detectOpenHandles",
+  "test:coverage": "cross-env NODE_ENV=test jest --coverage --runInBand",
+  "start": "node server.js"
+},
   "author": "",
   "license": "ISC",
   "description": "",

@@ -73,12 +73,6 @@ describe("Create Expense Flow", () => {
 
     expect(res.statusCode).toBe(401);
   });
-
-  afterAll(async () => {
-    if (mongoose.connection.readyState !== 0) {
-      await mongoose.connection.db.dropDatabase();
-      await mongoose.connection.close();
-    }
-  });
-
 });
+
+

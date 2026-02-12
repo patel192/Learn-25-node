@@ -8,9 +8,3 @@ describe("GET /health", () => {
     expect(res.body).toEqual({ status: "ok" });
   });
 });
-
-afterAll(async () => {
-  if (mongoose.connection && mongoose.connection.readyState !== 0) {
-    await mongoose.connection.close(true);
-  }
-});
