@@ -1,4 +1,5 @@
 # Expense Manager — Backend
+![Backend CI](https://github.com/patel192/Learn-25-node/actions/workflows/ci.yml/badge.svg)
 
 A backend REST API for an **Expense Management application**.  
 This server handles expense data storage, retrieval, and basic operations, and is designed to work with a frontend client.
@@ -34,13 +35,21 @@ It follows a simple and clear backend structure suitable for learning, extension
 ## 📁 Project Structure
 
 ```plaintext
-├─ server.js / index.js     — Application entry point
-├─ routes/                 — API route definitions
-├─ controllers/            — Request handling logic
-├─ models/                 — Database schemas
-├─ config/                 — Database & app configuration
-├─ package.json            — Project metadata and scripts
-└─ .env                    — Environment variables (not committed)
+├─ app.js                   — Express app configuration
+├─ server.js                — Production server entry point
+├─ src/
+│  ├─ routes/               — API route definitions
+│  ├─ Controllers/          — Request handling logic
+│  ├─ models/               — Database schemas
+│  ├─ middleware/           — Auth & role middleware
+│
+├─ tests/                   — API test suites
+│  ├─ setup.js              — Test database connection setup
+│
+├─ jest.config.js           — Jest configuration
+├─ package.json             — Project metadata and scripts
+└─ .env                     — Environment variables (not committed)
+
 ```
 🚀 Getting Started
 Follow these steps to run the backend locally.
@@ -98,10 +107,13 @@ All endpoints accept and return **JSON**.
 
 ## 🔐 Environment Variables
 
-| Variable    | Description                   |
-|------------|-------------------------------|
-| PORT       | Server port                   |
-| MONGO_URI  | MongoDB connection string     |
+| Variable          | Description                           |
+|------------------|---------------------------------------|
+| PORT             | Server port                           |
+| MONGO_URI        | Production MongoDB connection string  |
+| MONGO_URI_TEST   | Test MongoDB connection string        |
+| JWT_SECRET       | Secret key for JWT authentication      |
+
 
 ---
 
@@ -116,15 +128,39 @@ The frontend communicates with the backend using **HTTP requests** (`fetch` or `
 
 ---
 
-## 🧪 Testing
+## 🧪 Automated Testing
 
-You can test the API using:
+This backend uses:
 
-- Postman  
-- Thunder Client (VS Code extension)
+- **Jest** — Test runner  
+- **Supertest** — HTTP endpoint testing  
+- **MongoDB Test Database** — Isolated test environment  
 
-Send **JSON payloads** to the defined routes to verify responses.
+### Run tests
+```bash
+npm test
+```
+Run tests with coverage
+```bash
+npm run test:coverage
+```
 
+Coverage reports will be generated inside:
+```bash
+/coverage
+```
+
+Open in browser:
+```bash
+coverage/lcov-report/index.html
+```
+
+Test Architecture
+app.js exports the Express app (no server listening).
+server.js starts the production server.
+tests/setup.js connects to the test database before tests and closes it afterward.
+
+Tests run in isolated test database to prevent production data corruption.
 ---
 
 ## 💡 Possible Enhancements
@@ -161,5 +197,19 @@ For questions or collaboration:
 
 ---
 
+## ⚙️ Continuous Integration (CI)
+
+This repository uses **GitHub Actions** for automated testing.
+
+On every push or pull request:
+
+1. Dependencies are installed
+2. Tests are executed
+3. Build fails if any test fails
+
+CI workflow file:
+.github/workflows/ci.yml
+
+This ensures code quality and prevents broken deployments.
 ⭐ This backend is part of a **full stack Expense Manager application**.
 
