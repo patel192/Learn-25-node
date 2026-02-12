@@ -59,20 +59,6 @@ app.use("/api", systemlogRoutes);
 app.use("/api", recurringExpensesRoutes);
 app.use("/api", billRoutes);
 
-// DB connection
-const mongoUri =
-  process.env.NODE_ENV === "test"
-    ? process.env.MONGO_URI_TEST
-    : process.env.MONGO_URI;
-
-mongoose
-  .connect(mongoUri)
-  .then(() => {
-    if (process.env.NODE_ENV !== "test") {
-      console.log("DB connected");
-    }
-  })
-  .catch((err) => console.error(err));
 
 // EXPORT APP (important)
 module.exports = app;
