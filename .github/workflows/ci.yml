@@ -1,4 +1,4 @@
-name: Backend CI
+name: Backend CI/CD
 
 on:
   push:
@@ -7,30 +7,43 @@ on:
     branches: [ main ]
 
 jobs:
-  backend-ci:
+  backend-ci-cd:
     runs-on: ubuntu-latest
 
     steps:
+      #  Checkout repository
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      #  Setup Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 18
 
+      # Install dependencies
       - name: Install dependencies
         run: npm install
 
+      # Run tests with coverage
       - name: Run tests with coverage
         run: npm run test:coverage
         env:
           MONGO_URI_TEST: ${{ secrets.MONGO_URI_TEST }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
-      
+
+      #  Upload coverage report
       - name: Upload coverage report
         uses: actions/upload-artifact@v4
         with:
           name: coverage-report
           path: coverage
 
+      #  Build project (if backend has one)
+      - name: Build project
+        run: npm run build --if-present
+
+      #  Deploy to Render (ONLY on push to main)
+      - name: Deploy to Render
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK }}
