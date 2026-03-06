@@ -3,14 +3,15 @@
   "version": "1.0.0",
   "main": "app.js",
   "scripts": {
-  "test": "cross-env NODE_ENV=test jest --runInBand --detectOpenHandles",
-  "test:coverage": "cross-env NODE_ENV=test jest --coverage --runInBand",
-  "start": "node server.js"
-},
+    "test": "cross-env NODE_ENV=test jest --runInBand --detectOpenHandles",
+    "test:coverage": "cross-env NODE_ENV=test jest --coverage --runInBand",
+    "start": "node server.js"
+  },
   "author": "",
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "axios": "^1.12.2",
     "bcrypt": "^5.1.1",
     "cloudinary": "^1.41.3",

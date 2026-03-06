@@ -47,7 +47,7 @@ const adminReportRoutes = require("./src/routes/AdminReportRoutes");
 const systemlogRoutes = require("./src/routes/SystemlogRoutes");
 const recurringExpensesRoutes = require("./src/routes/RecurringExpensesRoutes");
 const billRoutes = require("./src/routes/BillRoutes");
-
+const aiRoutes = require("./src/routes/aiRoutes")
 app.use("/api", categoryRoutes);
 app.use("/api", userRoutes);
 app.use("/api", expenseRoutes);
@@ -58,6 +58,7 @@ app.use("/api", adminReportRoutes);
 app.use("/api", systemlogRoutes);
 app.use("/api", recurringExpensesRoutes);
 app.use("/api", billRoutes);
+app.use("/api/ai",aiRoutes);
 
 
 // EXPORT APP (important)
