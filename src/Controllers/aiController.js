@@ -1,5 +1,5 @@
 const { generateAIResponse } = require("../services/aiService");
-
+// Normal Tesing API for Google Gemini Integration
 const askAI = async (req, res) => {
   try {
     const { message } = req.body;
