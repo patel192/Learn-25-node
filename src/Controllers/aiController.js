@@ -8,16 +8,14 @@ const askAI = async (req, res) => {
 
     res.json({
       success: true,
-      reply: aiReply
+      reply: aiReply,
     });
-
   } catch (error) {
-
-    console.error(error);
+    console.error("AI ERROR:", error);
 
     res.status(500).json({
       success: false,
-      error: "AI request failed"
+      error: error.message,
     });
   }
 };
