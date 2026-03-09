@@ -33,7 +33,7 @@ const getExpenseInsights = async (req, res) => {
     const { userId } = req.params;
 
     const expenses = await ExpenseModel.find({ userID: userId }).populate(
-      "categoryID"
+      "categoryID",
     );
 
     if (!expenses.length) {
@@ -102,7 +102,7 @@ const generateBudgetPlan = async (req, res) => {
     const incomes = await IncomeModel.find({ userID: userId });
 
     const expenses = await ExpenseModel.find({ userID: userId }).populate(
-      "categoryID"
+      "categoryID",
     );
 
     const totalIncome = incomes.reduce((sum, i) => sum + i.amount, 0);
@@ -113,28 +113,29 @@ const generateBudgetPlan = async (req, res) => {
       return acc;
     }, {});
 
-    const totalExpenses = Object.values(summary).reduce(
-      (sum, v) => sum + v,
-      0
-    );
+    const totalExpenses = Object.values(summary).reduce((sum, v) => sum + v, 0);
 
     const surplus = totalIncome - totalExpenses;
 
     const prompt = `
-You are a financial advisor.
+You are a financial advisor AI.
 
-Return ONLY JSON in this format:
+Return ONLY valid JSON.
+Do NOT include markdown.
+Do NOT include explanation.
+
+Format:
 
 {
  "snapshot": {
-   "income": 0,
-   "expenses": 0,
-   "surplus": 0
+   "income": number,
+   "expenses": number,
+   "surplus": number
  },
  "budgetPlan": [
-   { "category": "", "recommended": 0 }
+   { "category": "string", "recommended": number }
  ],
- "recommendations": []
+ "recommendations": ["string"]
 }
 
 User Monthly Income: ${totalIncome}
@@ -145,19 +146,27 @@ ${JSON.stringify(summary, null, 2)}
 
     const aiReply = await generateAIResponse(prompt);
 
+    // remove markdown formatting if Gemini adds it
+    let cleaned = aiReply
+      .replace(/```json/g, "")
+      .replace(/```/g, "")
+      .trim();
+
     let parsed;
 
     try {
-      parsed = JSON.parse(aiReply);
-    } catch {
+      parsed = JSON.parse(cleaned);
+    } catch (err) {
+      console.log("AI JSON parse error:", err);
+
       parsed = {
         snapshot: {
           income: totalIncome,
           expenses: totalExpenses,
-          surplus: surplus,
+          surplus: totalIncome - totalExpenses,
         },
         budgetPlan: [],
-        recommendations: [aiReply],
+        recommendations: [cleaned],
       };
     }
 
