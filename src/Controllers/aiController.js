@@ -2,7 +2,9 @@ const { generateAIResponse } = require("../services/aiService");
 const ExpenseModel = require("../models/ExpenseModel");
 const IncomeModel = require("../models/IncomeModel");
 
-// Normal Tesing API for Google Gemini Integration
+// ===============================
+// AI Chat
+// ===============================
 const askAI = async (req, res) => {
   try {
     const { message } = req.body;
@@ -23,35 +25,41 @@ const askAI = async (req, res) => {
   }
 };
 
+// ===============================
+// Expense Insights
+// ===============================
 const getExpenseInsights = async (req, res) => {
   try {
     const { userId } = req.params;
 
-    // fetch user expenses
     const expenses = await ExpenseModel.find({ userID: userId }).populate(
-      "categoryID",
+      "categoryID"
     );
 
-    if (!expenses || expenses.length === 0) {
+    if (!expenses.length) {
       return res.json({
         success: true,
-        insights: "No expenses available to analyze.",
+        insights: [],
       });
     }
 
-    // summarize expenses by category
     const summary = expenses.reduce((acc, item) => {
       const category = item.categoryID?.name || "Other";
-
       acc[category] = (acc[category] || 0) + item.amount;
-
       return acc;
     }, {});
 
     const prompt = `
 You are a financial advisor.
 
-Analyze this expense summary and give financial insights and saving suggestions.
+Analyze the following expense summary and return ONLY JSON in this format:
+
+{
+  "topCategory": "",
+  "totalExpenses": "",
+  "insights": [],
+  "recommendations": []
+}
 
 Expense Summary:
 ${JSON.stringify(summary, null, 2)}
@@ -59,56 +67,116 @@ ${JSON.stringify(summary, null, 2)}
 
     const aiReply = await generateAIResponse(prompt);
 
+    let parsed;
+
+    try {
+      parsed = JSON.parse(aiReply);
+    } catch {
+      parsed = {
+        insights: [aiReply],
+        recommendations: [],
+      };
+    }
+
     res.json({
       success: true,
-      insights: aiReply,
+      insights: parsed,
     });
   } catch (error) {
     console.error("AI ERROR:", error);
 
     res.status(500).json({
       success: false,
-      error: "Failed to generate AI insights",error,
+      error: "Failed to generate AI insights",
     });
   }
 };
 
-const generateBudgetPlan = async (req,res) => {
-  try{
- const {userId} = req.params;
- const incomes = await IncomeModel.find({userID:userId});
- const expenses = await ExpenseModel.find({userID:userId}).populate("categoryID");
+// ===============================
+// AI Budget Planner
+// ===============================
+const generateBudgetPlan = async (req, res) => {
+  try {
+    const { userId } = req.params;
 
- const totalIncome = incomes.reduce((sum,i) => sum + i.amount,0);
- const summary = expenses.reduce((acc,item) => {
-const category = item.categoryID?.name || "other";
-acc[category] = (acc[category] || 0) + item.amount;
-return acc;
- },{});
+    const incomes = await IncomeModel.find({ userID: userId });
 
- const prompt = `
- You Are a Financial advisor.
-  User monthly income : ${totalIncome}
+    const expenses = await ExpenseModel.find({ userID: userId }).populate(
+      "categoryID"
+    );
 
-  User expenses by category : ${JSON.stringify(summary,null,2)}
+    const totalIncome = incomes.reduce((sum, i) => sum + i.amount, 0);
 
-  create a recommended monthly budget plan using categories and  saving advice.
+    const summary = expenses.reduce((acc, item) => {
+      const category = item.categoryID?.name || "Other";
+      acc[category] = (acc[category] || 0) + item.amount;
+      return acc;
+    }, {});
 
-  Format response using markdown .
- `;
+    const totalExpenses = Object.values(summary).reduce(
+      (sum, v) => sum + v,
+      0
+    );
 
- const aiReply  = await generateAIResponse(prompt);
- res.json({
-  success:true,
-  budgetPlan:aiReply
- });
-  }catch(error){
-console.error(error)
+    const surplus = totalIncome - totalExpenses;
 
-res.status(500).json({
-  success:false,
-  error:"Failed to generate budget plan"
-});
+    const prompt = `
+You are a financial advisor.
+
+Return ONLY JSON in this format:
+
+{
+ "snapshot": {
+   "income": 0,
+   "expenses": 0,
+   "surplus": 0
+ },
+ "budgetPlan": [
+   { "category": "", "recommended": 0 }
+ ],
+ "recommendations": []
+}
+
+User Monthly Income: ${totalIncome}
+
+User Expenses by Category:
+${JSON.stringify(summary, null, 2)}
+`;
+
+    const aiReply = await generateAIResponse(prompt);
+
+    let parsed;
+
+    try {
+      parsed = JSON.parse(aiReply);
+    } catch {
+      parsed = {
+        snapshot: {
+          income: totalIncome,
+          expenses: totalExpenses,
+          surplus: surplus,
+        },
+        budgetPlan: [],
+        recommendations: [aiReply],
+      };
+    }
+
+    res.json({
+      success: true,
+      budgetPlan: parsed,
+    });
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      success: false,
+      error: "Failed to generate budget plan",
+    });
   }
 };
-module.exports = { askAI, getExpenseInsights,generateBudgetPlan };
+
+module.exports = {
+  askAI,
+  getExpenseInsights,
+  generateBudgetPlan,
+};
