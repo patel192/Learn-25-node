@@ -66,7 +66,7 @@ ${JSON.stringify(summary, null, 2)}
 
     res.status(500).json({
       success: false,
-      error: "Failed to generate AI insights",
+      error: "Failed to generate AI insights",error,
     });
   }
 };
