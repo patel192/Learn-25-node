@@ -77,7 +77,7 @@ const generateBudgetPlan = async (req,res) => {
   try{
  const {userId} = req.params;
  const incomes = await IncomeModel.find({userID:userId});
- const expenses = await ExpenseModel.find({userID:userId}).populate("categoryID");\
+ const expenses = await ExpenseModel.find({userID:userId}).populate("categoryID");
 
  const totalIncome = incomes.reduce((sum,i) => sum + i.amount,0);
  const summary = expenses.reduce((acc,item) => {
