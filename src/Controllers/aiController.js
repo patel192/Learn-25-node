@@ -184,8 +184,94 @@ ${JSON.stringify(summary, null, 2)}
   }
 };
 
+// Overspending detection
+const detectSpendingRisk = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    // Fetch income
+    const incomes = await IncomeModel.find({ userID: userId });
+
+    // Fetch expenses
+    const expenses = await ExpenseModel.find({ userID: userId }).populate(
+      "categoryID",
+    );
+
+    if (!expenses.length) {
+      return res.json({
+        success: true,
+        risk: {
+          riskLevel: "Low",
+          message: "No spending data available.",
+        },
+      });
+    }
+
+    // Total income
+    const totalIncome = incomes.reduce((sum, i) => sum + i.amount, 0);
+
+    // Expense summary
+    const summary = expenses.reduce((acc, item) => {
+      const category = item.categoryID?.name || "Other";
+      acc[category] = (acc[category] || 0) + item.amount;
+      return acc;
+    }, {});
+
+    const prompt = `
+You are a financial risk advisor.
+
+Analyze this spending data and detect overspending risk.
+
+User Monthly Income: ${totalIncome}
+
+User Expenses by Category:
+${JSON.stringify(summary, null, 2)}
+
+Return ONLY JSON format:
+
+{
+ "riskLevel": "Low | Medium | High",
+ "category": "category name",
+ "reason": "why this is risky",
+ "suggestion": "financial advice"
+}
+`;
+
+    const aiReply = await generateAIResponse(prompt);
+
+    // Clean AI response
+    const cleaned = aiReply.replace(/```json|```/g, "").trim();
+
+    let parsed;
+
+    try {
+      parsed = JSON.parse(cleaned);
+    } catch (err) {
+      parsed = {
+        riskLevel: "Unknown",
+        category: "Unknown",
+        reason: cleaned,
+        suggestion: "AI response parsing failed.",
+      };
+    }
+
+    res.json({
+      success: true,
+      risk: parsed,
+    });
+  } catch (error) {
+    console.error("AI Risk Error:", error);
+
+    res.status(500).json({
+      success: false,
+      error: "Failed to detect spending risk",
+    });
+  }
+};
+
 module.exports = {
   askAI,
   getExpenseInsights,
   generateBudgetPlan,
+  detectSpendingRisk
 };
