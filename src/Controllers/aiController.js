@@ -1,5 +1,7 @@
 const { generateAIResponse } = require("../services/aiService");
 const ExpenseModel = require("../models/ExpenseModel");
+const IncomeModel = require("../models/IncomeModel");
+
 // Normal Tesing API for Google Gemini Integration
 const askAI = async (req, res) => {
   try {
@@ -70,4 +72,43 @@ ${JSON.stringify(summary, null, 2)}
     });
   }
 };
-module.exports = { askAI, getExpenseInsights };
+
+const generateBudgetPlan = async (req,res) => {
+  try{
+ const {userId} = req.params;
+ const incomes = await IncomeModel.find({userID:userId});
+ const expenses = await ExpenseModel.find({userID:userId}).populate("categoryID");\
+
+ const totalIncome = incomes.reduce((sum,i) => sum + i.amount,0);
+ const summary = expenses.reduce((acc,item) => {
+const category = item.categoryID?.name || "other";
+acc[category] = (acc[category] || 0) + item.amount;
+return acc;
+ },{});
+
+ const prompt = `
+ You Are a Financial advisor.
+  User monthly income : ${totalIncome}
+
+  User expenses by category : ${JSON.stringify(summary,null,2)}
+
+  create a recommended monthly budget plan using categories and  saving advice.
+
+  Format response using markdown .
+ `;
+
+ const aiReply  = await generateAIResponse(prompt);
+ res.json({
+  success:true,
+  budgetPlan:aiReply
+ });
+  }catch(error){
+console.error(error)
+
+res.status(500).json({
+  success:false,
+  error:"Failed to generate budget plan"
+});
+  }
+};
+module.exports = { askAI, getExpenseInsights,generateBudgetPlan };
