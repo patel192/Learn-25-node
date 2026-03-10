@@ -87,7 +87,7 @@ ${JSON.stringify(summary, null, 2)}
 
     res.status(500).json({
       success: false,
-      error: "Failed to generate AI insights",
+      error: error.message,
     });
   }
 };
@@ -179,7 +179,7 @@ ${JSON.stringify(summary, null, 2)}
 
     res.status(500).json({
       success: false,
-      error: "Failed to generate budget plan",
+      error: `Failed to generate budget plan ${error.message}`,
     });
   }
 };
@@ -264,7 +264,7 @@ Return ONLY JSON format:
 
     res.status(500).json({
       success: false,
-      error: "Failed to detect spending risk",
+      error: `Failed to detect spending risk ${error.message}`,
     });
   }
 };
