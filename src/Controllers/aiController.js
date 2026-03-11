@@ -333,10 +333,73 @@ res.json({
    });
   }
 }
+
+//Financial Saving Oppotunities for Future
+const detectSavingOpportunities = async (req, res) => {
+  try {
+
+    const { userId } = req.params;
+
+    const incomes = await IncomeModel.find({ userID: userId });
+    const expenses = await ExpenseModel.find({ userID: userId }).populate("categoryID");
+
+    const totalIncome = incomes.reduce((sum, i) => sum + i.amount, 0);
+
+    const summary = expenses.reduce((acc, item) => {
+
+      const category = item.categoryID?.name || "Other";
+
+      acc[category] = (acc[category] || 0) + item.amount;
+
+      return acc;
+
+    }, {});
+
+    const prompt = `
+You are a financial advisor.
+
+User income:
+${totalIncome}
+
+User expenses by category:
+${JSON.stringify(summary, null, 2)}
+
+Identify areas where the user can reduce spending and save money.
+
+Provide:
+
+1. Categories with high spending
+2. Estimated monthly savings opportunities
+3. Practical financial suggestions
+
+Format response using markdown.
+`;
+
+    const aiReply = await generateAIResponse(prompt);
+
+    res.json({
+      success: true,
+      opportunities: aiReply
+    });
+
+  } catch (error) {
+
+    console.error(error);
+
+    res.status(500).json({
+      success: false,
+      error: "Failed to detect saving opportunities"
+    });
+
+  }
+};
+
+
 module.exports = {
   askAI,
   getExpenseInsights,
   generateBudgetPlan,
   detectSpendingRisk,
-  getFinancialForecast
+  getFinancialForecast,
+  detectSavingOpportunities
 };
