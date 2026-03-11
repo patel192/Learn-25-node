@@ -6,7 +6,8 @@ const {
   detectSpendingRisk,
   getFinancialForecast,
   detectSavingOpportunities,
-  getFinancialHealthScore
+  getFinancialHealthScore,
+  getAllInsights
 } = require("../Controllers/aiController");
 
 const router = express.Router();
@@ -18,4 +19,6 @@ router.get("/spending-risk/:userId",detectSpendingRisk);
 router.get("/financial-forecast/:userId",getFinancialForecast);
 router.get("/saving-opportunities/:userId",detectSavingOpportunities)
 router.get("/financial-health/:userId",getFinancialHealthScore)
+router.get("/insights/:userId",getAllInsights);
+
 module.exports = router;

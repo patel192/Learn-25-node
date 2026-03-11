@@ -434,6 +434,27 @@ ${JSON.stringify(summary, null, 2)}
   }
 };
 
+
+const getAllInsights = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    const insights = await AllInsightModel.find({ userID: userId }).sort({
+      createdAt: -1,
+    });
+    res.json({
+      success: true,
+      insights,
+    });
+  } catch (error) {
+    console.error("Fetch Insight Error:", error);
+    res.status(500).json({
+      success: false,
+      error: "Failed to fetch AI insights history",
+    });
+  }
+};
+
 module.exports = {
   askAI,
   getExpenseInsights,
@@ -442,4 +463,5 @@ module.exports = {
   getFinancialForecast,
   detectSavingOpportunities,
   getFinancialHealthScore,
+  getAllInsights
 };
