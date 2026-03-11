@@ -269,33 +269,32 @@ Return ONLY JSON format:
   }
 };
 
-
 // Financial Forecast For Future
 
-const getFinancialForecast = async (req,res) => {
-  try{
-   const {userId} = req.params;
+const getFinancialForecast = async (req, res) => {
+  try {
+    const { userId } = req.params;
 
-   const incomes = await IncomeModel.find({userID:userId});
+    const incomes = await IncomeModel.find({ userID: userId });
 
-   const expenses = await ExpenseModel.find({userID:userId});
+    const expenses = await ExpenseModel.find({ userID: userId });
 
-   if(!incomes.length){
-    return res.json({
-      success:true,
-      forecast:"No income available to generate financial forecast"
-    });
-   }
-   const totalIncome = incomes.reduce((sum,i)=> sum + i.amount,0);
-   const totalExpenses = expenses.reduce((sum,e) => sum + e.amount,0);
+    if (!incomes.length) {
+      return res.json({
+        success: true,
+        forecast: "No income available to generate financial forecast",
+      });
+    }
+    const totalIncome = incomes.reduce((sum, i) => sum + i.amount, 0);
+    const totalExpenses = expenses.reduce((sum, e) => sum + e.amount, 0);
 
-   const summary = expenses.reduce((acc,item) => {
-    const category = item.categoryID?.name || "Other";
-    acc[category] = (acc[categoryID] || 0) + item.amount;
-    return acc;
-   },{});
+    const summary = expenses.reduce((acc, item) => {
+      const category = item.categoryID?.name || "Other";
+      acc[category] = (acc[categoryID] || 0) + item.amount;
+      return acc;
+    }, {});
 
-   const prompt = `
+    const prompt = `
 You are a professional financial advisor.
 
 User financial data:
@@ -319,40 +318,39 @@ Include:
 Format the response using markdown with headings and bullet points.
 `;
 
-const aiReply = await generateAIResponse(prompt);
+    const aiReply = await generateAIResponse(prompt);
 
-res.json({
-  success:true,
-  forecast:aiReply
-});
-  }catch(error){
-   console.error("AI Forecast Error:",error);
-   res.status(500).json({
-    success:false,
-    error:`Failed to generate financiall forecast ${error}`
-   });
+    res.json({
+      success: true,
+      forecast: aiReply,
+    });
+  } catch (error) {
+    console.error("AI Forecast Error:", error);
+    res.status(500).json({
+      success: false,
+      error: `Failed to generate financiall forecast ${error}`,
+    });
   }
-}
+};
 
 //Financial Saving Oppotunities for Future
 const detectSavingOpportunities = async (req, res) => {
   try {
-
     const { userId } = req.params;
 
     const incomes = await IncomeModel.find({ userID: userId });
-    const expenses = await ExpenseModel.find({ userID: userId }).populate("categoryID");
+    const expenses = await ExpenseModel.find({ userID: userId }).populate(
+      "categoryID",
+    );
 
     const totalIncome = incomes.reduce((sum, i) => sum + i.amount, 0);
 
     const summary = expenses.reduce((acc, item) => {
-
       const category = item.categoryID?.name || "Other";
 
       acc[category] = (acc[category] || 0) + item.amount;
 
       return acc;
-
     }, {});
 
     const prompt = `
@@ -379,21 +377,78 @@ Format response using markdown.
 
     res.json({
       success: true,
-      opportunities: aiReply
+      opportunities: aiReply,
     });
-
   } catch (error) {
-
     console.error(error);
 
     res.status(500).json({
       success: false,
-      error: "Failed to detect saving opportunities"
+      error: "Failed to detect saving opportunities",
     });
-
   }
 };
 
+const getFinancialHealthScore = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    const incomes = await IncomeModel.find({ userID: userId });
+    const expenses = await ExpenseModel.find({ userID: userId }).populate(
+      "categoryID",
+    );
+
+    const totalIncome = incomes.reduce((sum, i) => sum + i.amount, 0);
+    const totalExpenses = expenses.reduce((sum, e) => sum + e.amount, 0);
+
+    const savings = totalIncome - totalExpenses;
+
+    const summary = expenses.reduce((acc, item) => {
+      const category = item.categoryID?.name || "Other";
+
+      acc[category] = (acc[category] || 0) + item.amount;
+
+      return acc;
+    }, {});
+
+    const prompt = `
+You are a financial advisor.
+
+User financial data:
+
+Income: ${totalIncome}
+Expenses: ${totalExpenses}
+Savings: ${savings}
+
+Expense Breakdown:
+${JSON.stringify(summary, null, 2)}
+
+Calculate a Financial Health Score out of 100.
+
+Include:
+1. Score
+2. Financial strengths
+3. Financial weaknesses
+4. Suggestions to improve score
+
+Format the response in markdown.
+`;
+
+    const aiReply = await generateAIResponse(prompt);
+
+    res.json({
+      success: true,
+      healthScore: aiReply,
+    });
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      success: false,
+      error: "Failed to generate financial health score",
+    });
+  }
+};
 
 module.exports = {
   askAI,
@@ -401,5 +456,6 @@ module.exports = {
   generateBudgetPlan,
   detectSpendingRisk,
   getFinancialForecast,
-  detectSavingOpportunities
+  detectSavingOpportunities,
+  getFinancialHealthScore,
 };
