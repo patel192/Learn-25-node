@@ -269,9 +269,74 @@ Return ONLY JSON format:
   }
 };
 
+
+// Financial Forecast For Future
+
+const getFinancialForecast = async (req,res) => {
+  try{
+   const {userId} = req.params;
+
+   const incomes = await IncomeModel.find({userID:userId});
+
+   const expenses = await ExpenseModel.find({userID:userId});
+
+   if(!incomes.length){
+    return res.json({
+      success:true,
+      forecast:"No income available to generate financial forecast"
+    });
+   }
+   const totalIncome = incomes.reduce((sum,i)=> sum + i.amount,0);
+   const totalExpenses = expenses.reduce((sum,e) => sum + e.amount,0);
+
+   const summary = expenses.reduce((acc,item) => {
+    const category = item.categoryID?.name || "Other";
+    acc[category] = (acc[categoryID] || 0) + item.amount;
+    return acc;
+   },{});
+
+   const prompt = `
+You are a professional financial advisor.
+
+User financial data:
+
+Monthly Income: ${totalIncome}
+
+Total Expenses: ${totalExpenses}
+
+Expense Breakdown:
+${JSON.stringify(summary, null, 2)}
+
+Analyze this data and create a financial forecast for the next 6 months.
+
+Include:
+
+1. Expected savings projection
+2. Potential financial risks
+3. Suggestions to improve savings
+4. Key financial insights
+
+Format the response using markdown with headings and bullet points.
+`;
+
+const aiReply = await generateAIResponse(prompt);
+
+res.json({
+  success:true,
+  forecast:aiReply
+});
+  }catch(error){
+   console.error("AI Forecast Error:",error);
+   res.status(500).json({
+    success:false,
+    error:`Failed to generate financiall forecast ${error}`
+   });
+  }
+}
 module.exports = {
   askAI,
   getExpenseInsights,
   generateBudgetPlan,
-  detectSpendingRisk
+  detectSpendingRisk,
+  getFinancialForecast
 };
