@@ -34,7 +34,8 @@ const GetuserbyId = async (req, res) => {
 const DeleteUser = async (req, res) => {
   try {
     const Deleteduser = await UserModel.findByIdAndDelete(req.params.id);
-    if (!Deleteduser) return res.status(404).json({ message: "User not found" });
+    if (!Deleteduser)
+      return res.status(404).json({ message: "User not found" });
     res.status(200).json({ message: "User deleted successfully" });
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -79,19 +80,21 @@ const LoginUser = async (req, res) => {
     const { email, password } = req.body;
 
     const foundUser = await UserModel.findOne({ email });
+
     if (!foundUser) {
-      return res.status(404).json({ message: "Email not found" });
+      return res.status(401).json({ message: "Invalid email or password" });
     }
 
-    const isMatch = bcrypt.compareSync(password, foundUser.password);
+    const isMatch = await bcrypt.compare(password, foundUser.password);
+
     if (!isMatch) {
-      return res.status(401).json({ message: "Invalid credentials" });
+      return res.status(401).json({ message: "Invalid email or password" });
     }
 
     const token = jwt.sign(
       { id: foundUser._id, role: foundUser.role || "User" },
       secret,
-      { expiresIn: "1h" }
+      { expiresIn: "1h" },
     );
 
     const { password: _, ...userData } = foundUser.toObject();
@@ -102,7 +105,10 @@ const LoginUser = async (req, res) => {
       data: userData,
     });
   } catch (err) {
-    res.status(500).json({ message: "Error logging in", error: err.message });
+    res.status(500).json({
+      message: "Error logging in",
+      error: err.message,
+    });
   }
 };
 // ===================== Update User =====================
@@ -113,7 +119,7 @@ const UpdateUser = async (req, res) => {
     const updatedUser = await UserModel.findByIdAndUpdate(
       req.params.id,
       { name, email, bio, profilePic },
-      { new: true }
+      { new: true },
     );
 
     if (!updatedUser) {
@@ -125,7 +131,9 @@ const UpdateUser = async (req, res) => {
       data: updatedUser,
     });
   } catch (err) {
-    res.status(500).json({ message: "Error updating user", error: err.message });
+    res
+      .status(500)
+      .json({ message: "Error updating user", error: err.message });
   }
 };
 
