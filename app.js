@@ -57,7 +57,6 @@ app.use("/api", transactionRoutes);
 app.use("/api", budgetRoutes);
 app.use("/api", adminReportRoutes);
 app.use("/api", systemlogRoutes);
-app.use("/api", recurringExpensesRoutes);
 app.use("/api", billRoutes);
 app.use("/api/ai",aiRoutes);
 
