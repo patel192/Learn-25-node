@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 require("dotenv").config();
+require("./src/utiles/recurringCron")
 const app = require("./app");
 
 const mongoUri =
