@@ -41,8 +41,27 @@ const deleteRecurring = async (req, res) => {
     });
   }
 };
+
+const updateRecurring = async (req, res) => {
+  try {
+    const updated = await RecurringModel.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true },
+    );
+    res.status(200).json({
+      message: "Recurring updated",
+      data: updated,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Error Updating recurring",
+    });
+  }
+};
 module.exports = {
   createRecurring,
   getRecurringByUser,
-  deleteRecurring
+  deleteRecurring,
+  updateRecurring
 };
