@@ -6,5 +6,6 @@ const Recurring = require("../Controllers/RecurringController");
 router.post("/recurring", Recurring.createRecurring);
 router.get("/recurring/:userId", Recurring.getRecurringByUser);
 router.delete("/recurring/:id", Recurring.deleteRecurring);
-router.put("/recurring/:id",Recurring.updateRecurring);
+router.put("/recurring/:id", Recurring.updateRecurring);
+router.get("/recurring/upcoming/:userId", Recurring.getUpcomingRecurring);
 module.exports = router;

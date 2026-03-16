@@ -59,9 +59,27 @@ const updateRecurring = async (req, res) => {
     });
   }
 };
+
+const getUpcomingRecurring = async (req, res) => {
+  try {
+    const today = new Date();
+    const upcoming = await RecurringModel.find({
+      userId: req.params.userId,
+      nextDate: { $gte: today },
+    })
+      .sort({ nextDate: 1 })
+      .limit(5);
+    res.json({ data: upcoming });
+  } catch (error) {
+    res.status(500).json({
+      message: "Error fetching upcoming payments",
+    });
+  }
+};
 module.exports = {
   createRecurring,
   getRecurringByUser,
   deleteRecurring,
-  updateRecurring
+  updateRecurring,
+  getUpcomingRecurring
 };
