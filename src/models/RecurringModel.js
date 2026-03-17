@@ -26,5 +26,9 @@ const recurringSchema = new mongoose.Schema({
     ref: "users",
     required: true,
   },
+  isActive: {
+    type:Boolean,
+    default:true
+  }
 });
 module.exports = mongoose.model("recurring", recurringSchema);

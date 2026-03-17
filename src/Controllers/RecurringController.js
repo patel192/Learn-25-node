@@ -76,10 +76,27 @@ const getUpcomingRecurring = async (req, res) => {
     });
   }
 };
+
+const toggleRecurringStatus = async (req,res) => {
+  try{
+  const recurring = await RecurringModel.findById(req.params.id);
+  recurring.isActive = !recurring.isActive;
+  await recurring.save();
+  res.json({
+    message:"Recurring status updated",
+    data:recurring
+  });
+  }catch(error){
+   res.status(500).json({
+    message:"Error updating recurring status"
+   });
+  }
+}
 module.exports = {
   createRecurring,
   getRecurringByUser,
   deleteRecurring,
   updateRecurring,
-  getUpcomingRecurring
+  getUpcomingRecurring,
+  toggleRecurringStatus
 };
