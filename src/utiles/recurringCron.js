@@ -6,6 +6,7 @@ cron.schedule("0 0 * * *", async () => {
   try {
     const today = new Date();
     const recurringList = await RecurringModel.find({
+      isActive:true,
       nextDate: { $lte: today },
     });
 
