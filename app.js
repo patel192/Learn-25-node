@@ -40,26 +40,27 @@ app.use(
 const userRoutes = require("./src/routes/UserRoutes");
 const categoryRoutes = require("./src/routes/CategoryRoutes");
 const expenseRoutes = require("./src/routes/ExpenseRoutes");
-const recurringRoutes = require("./src/routes/RecurringRoutes")
+const recurringRoutes = require("./src/routes/RecurringRoutes");
 const incomeRoutes = require("./src/routes/IncomeRoutes");
 const transactionRoutes = require("./src/routes/TransactionRoutes");
 const budgetRoutes = require("./src/routes/BudgetRoutes");
 const adminReportRoutes = require("./src/routes/AdminReportRoutes");
 const systemlogRoutes = require("./src/routes/SystemlogRoutes");
 const billRoutes = require("./src/routes/BillRoutes");
-const aiRoutes = require("./src/routes/aiRoutes")
+const aiRoutes = require("./src/routes/aiRoutes");
+const reportRoutes = require("./src/routes/ReportRoutes");
 app.use("/api", categoryRoutes);
 app.use("/api", userRoutes);
 app.use("/api", expenseRoutes);
-app.use("/api",recurringRoutes);
+app.use("/api", recurringRoutes);
 app.use("/api", incomeRoutes);
 app.use("/api", transactionRoutes);
 app.use("/api", budgetRoutes);
 app.use("/api", adminReportRoutes);
 app.use("/api", systemlogRoutes);
 app.use("/api", billRoutes);
-app.use("/api/ai",aiRoutes);
-
+app.use("/api/ai", aiRoutes);
+app.use("/api", reportRoutes);
 
 // EXPORT APP (important)
 module.exports = app;

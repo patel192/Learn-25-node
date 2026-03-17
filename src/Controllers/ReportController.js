@@ -1,54 +1,41 @@
-// Backend: Corrected getAdminReport Controller
-const IncomeModel = require("../models/IncomeModel");
+const PDFDocument = require("pdfkit");
 const ExpenseModel = require("../models/ExpenseModel");
-const UserModel = require("../models/UserModel");
+const IncomeModel = require("../models/IncomeModel");
 
-exports.getAdminReport = async (req, res) => {
-  try {
-    const users = await UserModel.find({});
-    const totalUsers = users.length;
-    const incomes = await IncomeModel.find();
-    const expenses = await ExpenseModel.find().populate("categoryID");
+const generateReport = async(req,res) => {
+  try{
+   const userId = req.params.userId;
 
-    const activeUsers = users.filter((u) => u.is_active).length;
-    const deactivatedUsers = totalUsers - activeUsers;
+   const expenses = await ExpenseModel.find({userId});
+   const income = await IncomeModel.find({userId});
 
-    const totalIncome = incomes.reduce((sum, i) => sum + i.amount, 0);
-    const totalExpense = expenses.reduce((sum, e) => sum + e.amount, 0);
+   const totalIncome = income.reduce((a,i) => a + i.amount,0 );
+   const totalExpenses = expenses.reduce((a,e) => a + e.amount,0 )
+   
+   const doc = new PDFDocument();
 
-    // Category distribution from ExpenseModel (not TransactionModel)
-    const categoryMap = {};
-    expenses.forEach((e) => {
-      const categoryName = e.categoryID?.name; // Get the name from populated category
-      if (categoryName) {
-        categoryMap[categoryName] = (categoryMap[categoryName] || 0) + e.amount;
-      }
-    });
-    
-    const categoryDistribution = Object.entries(categoryMap).map(([name, value]) => ({
-      name,
-      value,
-    }));
+   res.setHeader("Content-Type","application/pdf");
+   res.setHeader("Content-Disposition","attachment; filename=financial-report.pdf");
 
-    // Most active user (based on total number of income + expense entries)
-    const userActivity = {};
-    [...incomes, ...expenses].forEach((item) => {
-      userActivity[item.userID] = (userActivity[item.userID] || 0) + 1;
-    });
-    const mostActiveUserId = Object.entries(userActivity).sort((a, b) => b[1] - a[1])[0]?.[0];
-    const mostActiveUser = mostActiveUserId ? await UserModel.findById(mostActiveUserId) : null;
+   doc.pipe(res);
+   doc.fontSize(22).text("Financial Report",{align:"center"});
+   doc.moveDown();
+   doc.fondSize(14).text(`Total Income: ${totalIncome}`);
+   doc.text(`Total Expenses: ${totalExpenses}`);
+   doc.text(`Balance: ${totalIncome - totalExpenses}`);
 
-    res.json({
-      totalIncome,
-      totalExpense,
-      totalUsers,
-      activeUsers,
-      deactivatedUsers,
-      categoryDistribution,
-      mostActiveUser: mostActiveUser ? mostActiveUser.name : "N/A",
-    });
-  } catch (error) {
-    console.error("Admin report error:", error);
-    res.status(500).json({ error: "Failed to generate report" });
+   doc.moveDown();
+   doc.text("Expenses:");
+   expenses.forEach((e)=>{
+     doc.text(`${e.title} - ${e.amount}`); 
+   });
+   doc.end();
+  }catch(error) {
+  res.status(500).json({
+    message:"Error generating report"
+  });
   }
-};
+}
+
+
+module.exports = {generateReport}
