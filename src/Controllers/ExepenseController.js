@@ -95,25 +95,53 @@ const GetExpensebyID = async (req,res) => {
          })
     }
 }
-const GetExpensebyUserId = async (req,res) => {
-    try{
-      const ExpensebyUserID = await ExpenseModel.find({userID:req.params.userId}).populate("userID categoryID");
-      if(ExpensebyUserID.length === 0){
-        res.status(404).json({
-            message:"No Expenses Found"
-        })
-      }else{
-        res.status(200).json({
-            message:"Expense Found Successfully",
-            data:ExpensebyUserID
-        })
-      }
-    }catch(error){
-      res.status(500).json({
-        message:error.message
-      })
+const GetExpensebyUserId = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { startDate, endDate, categoryID, minAmount, maxAmount } = req.query;
+
+    let query = { userID: userId };
+
+    // Date Filtering
+    if (startDate || endDate) {
+      query.date = {};
+      if (startDate) query.date.$gte = new Date(startDate);
+      if (endDate) query.date.$lte = new Date(endDate);
     }
-}
+
+    // Category Filtering
+    if (categoryID) {
+      query.categoryID = categoryID;
+    }
+
+    // Amount Filtering
+    if (minAmount || maxAmount) {
+      query.amount = {};
+      if (minAmount) query.amount.$gte = Number(minAmount);
+      if (maxAmount) query.amount.$lte = Number(maxAmount);
+    }
+
+    const expenses = await ExpenseModel.find(query)
+      .populate("userID categoryID")
+      .sort({ date: -1 });
+
+    if (expenses.length === 0) {
+      return res.status(200).json({
+        message: "No Expenses Found matching filters",
+        data: [],
+      });
+    }
+
+    res.status(200).json({
+      message: "Expenses Found Successfully",
+      data: expenses,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
 const GetRecentExpenses = async (req,res) => {
   try{
    const recentExpenses = await ExpenseModel.find({ userID: req.params.userId })

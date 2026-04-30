@@ -1,10 +1,9 @@
-const express = require("express");
-const mongoose = require("mongoose");
-const cors = require("cors");
+const cookieParser = require("cookie-parser");
 require("dotenv").config();
 
 const app = express();
 app.use(express.json());
+app.use(cookieParser());
 
 // Health endpoint (for CI + monitoring)
 app.get("/health", (req, res) => {
