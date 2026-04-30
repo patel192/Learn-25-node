@@ -97,7 +97,7 @@ const LoginUser = async (req, res) => {
 
     const refreshToken = jwt.sign(
       { id: foundUser._id },
-      process.env.REFRESH_TOKEN_SECRET || "refresh_secret",
+      process.env.REFRESH_SECRET || "refresh_secret",
       { expiresIn: "7d" }
     );
 
@@ -120,6 +120,7 @@ const LoginUser = async (req, res) => {
 
     res.status(200).json({
       message: "Login successful",
+      token: accessToken,
       data: userData,
     });
   } catch (err) {
@@ -136,7 +137,7 @@ const RefreshToken = async (req, res) => {
   if (!refreshToken) return res.status(401).json({ message: "No refresh token" });
 
   try {
-    const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET || "refresh_secret");
+    const decoded = jwt.verify(refreshToken, process.env.REFRESH_SECRET || "refresh_secret");
     const user = await UserModel.findById(decoded.id);
     if (!user) return res.status(401).json({ message: "User not found" });
 
