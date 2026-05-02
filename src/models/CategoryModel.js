@@ -1,15 +1,25 @@
-const mongoose = require("mongoose")
+const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
-const categorySchema = new Schema({
-    name:{
-        type:String
+
+/**
+ * --- CATEGORY MODEL ---
+ * Defines the classification for transactions (e.g., Food, Travel).
+ */
+
+const categorySchema = new Schema(
+  {
+    name: {
+      type: String, // Name of the category
     },
     type: {
-        type: String,
-        enum: ["income", "expense"],
-        required: true
-      }
-},{
-    timestamps:true
-})
-module.exports = mongoose.model("category",categorySchema)
+      type: String, // Whether it's for money coming in or going out
+      enum: ["income", "expense"],
+      required: true,
+    },
+  },
+  {
+    timestamps: true,
+  },
+);
+
+module.exports = mongoose.model("category", categorySchema);

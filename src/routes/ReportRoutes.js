@@ -1,7 +1,10 @@
-const express= require("express");
+const express = require("express");
 const router = express.Router();
-
 const ReportController = require("../Controllers/ReportController");
-router.get("/reports/:userId",ReportController.generateReport);
 
-module.exports = router;
+// --- FINANCIAL REPORTS ---
+
+// Generate a PDF summary for the user
+router.get("/reports/:userId", ReportController.generateReport);
+
+module.exports = router;

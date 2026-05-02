@@ -1,23 +1,35 @@
-const mongoose = require("mongoose")
-const Schema = mongoose.Schema
-const TransactionSchema = new Schema({
-    userID:{
-        type:Schema.Types.ObjectId,
-        ref:"users"
+const mongoose = require("mongoose");
+const Schema = mongoose.Schema;
+
+/**
+ * --- TRANSACTION MODEL ---
+ * A generic record for any kind of financial movement.
+ */
+
+const TransactionSchema = new Schema(
+  {
+    userID: {
+      type: Schema.Types.ObjectId,
+      ref: "users",
     },
-    type:{
-        type:String
+    type: {
+      type: String, // e.g., "Income", "Expense"
     },
-    amount:{
-        type:Number
+    amount: {
+      type: Number,
+      required: true,
     },
-    date:{
-        type:Date
+    date: {
+      type: Date,
+      default: Date.now,
     },
-    description:{
-        type:String
-    }
-},{
-    timestamps:true
-})
-module.exports = mongoose.model("trasaction",TransactionSchema)
+    description: {
+      type: String,
+    },
+  },
+  {
+    timestamps: true,
+  },
+);
+
+module.exports = mongoose.model("transaction", TransactionSchema);

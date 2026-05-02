@@ -1,4 +1,11 @@
 const IncomeModel = require("../models/IncomeModel");
+
+/**
+ * --- INCOME CONTROLLER ---
+ * Keeps track of all the money coming in (Salary, Freelancing, etc.).
+ */
+
+// Record a new source of income
 const AddIncome = async (req, res) => {
   try {
     const AddedIncome = await IncomeModel.create(req.body);
@@ -12,6 +19,8 @@ const AddIncome = async (req, res) => {
     });
   }
 };
+
+// Fetch every income record for every user (usually for admin)
 const GetAllincome = async (req, res) => {
   try {
     const Allincome = await IncomeModel.find();
@@ -25,6 +34,8 @@ const GetAllincome = async (req, res) => {
     });
   }
 };
+
+// Find a specific income entry by its ID
 const GetIncomebyID = async (req, res) => {
   try {
     const IncomebyID = await IncomeModel.findById(req.params.id);
@@ -38,9 +49,11 @@ const GetIncomebyID = async (req, res) => {
     });
   }
 };
+
+// Remove an income entry from the records
 const DeleteIncome = async (req, res) => {
   try {
-    const DeletedIncome = await IncomeModel.findByIdAndDelete(req.params.id);
+    await IncomeModel.findByIdAndDelete(req.params.id);
     res.status(200).json({
       message: "the income deleted successfully",
     });
@@ -50,11 +63,14 @@ const DeleteIncome = async (req, res) => {
     });
   }
 };
+
+// Pull all income records belonging to a specific user
 const GetIncomebyUserID = async (req, res) => {
   try {
     const IncomebyUserID = await IncomeModel.find({
       userID: req.params.userId,
     }).populate("userID");
+
     if (IncomebyUserID.length === 0) {
       res.status(404).json({
         message: "No Income Found",
@@ -71,6 +87,7 @@ const GetIncomebyUserID = async (req, res) => {
     });
   }
 };
+
 module.exports = {
   AddIncome,
   GetAllincome,
@@ -78,3 +95,4 @@ module.exports = {
   DeleteIncome,
   GetIncomebyUserID,
 };
+

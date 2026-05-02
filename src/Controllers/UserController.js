@@ -1,9 +1,15 @@
 const UserModel = require("../models/UserModel");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+
 const secret = process.env.JWT_SECRET;
 
-// ===================== Get All Users =====================
+/**
+ * --- USER CONTROLLER ---
+ * Handles everything related to users: auth, profiles, and admin actions.
+ */
+
+// Fetch a list of all users in the system
 const GetAllusers = async (req, res) => {
   try {
     const Allusers = await UserModel.find();
@@ -16,7 +22,7 @@ const GetAllusers = async (req, res) => {
   }
 };
 
-// ===================== Get User by ID =====================
+// Look up a specific user by their unique ID
 const GetuserbyId = async (req, res) => {
   try {
     const UserbyID = await UserModel.findById(req.params.id);
@@ -30,7 +36,7 @@ const GetuserbyId = async (req, res) => {
   }
 };
 
-// ===================== Delete User =====================
+// Remove a user from the database
 const DeleteUser = async (req, res) => {
   try {
     const Deleteduser = await UserModel.findByIdAndDelete(req.params.id);
@@ -42,11 +48,10 @@ const DeleteUser = async (req, res) => {
   }
 };
 
-// ===================== Signup User =====================
+// Register a new user - handles password hashing automatically
 const SignupUser = async (req, res) => {
   try {
-    console.log("Received Signup Data:", req.body);
-
+    // Hash the password before saving so we never store plain text
     const salt = bcrypt.genSaltSync(10);
     const hashedPassword = bcrypt.hashSync(req.body.password, salt);
 
@@ -56,6 +61,7 @@ const SignupUser = async (req, res) => {
       password: hashedPassword,
       role: req.body.role || "User",
     });
+
     res.status(201).json({
       message: "User created successfully",
       data: {
@@ -74,12 +80,13 @@ const SignupUser = async (req, res) => {
   }
 };
 
-// ===================== Login User =====================
+// Authenticate user and issue JWT tokens in secure cookies
 const LoginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
     const foundUser = await UserModel.findOne({ email });
 
+    // Check if user exists and password matches
     if (!foundUser) {
       return res.status(401).json({ message: "Invalid email or password" });
     }
@@ -89,33 +96,34 @@ const LoginUser = async (req, res) => {
       return res.status(401).json({ message: "Invalid email or password" });
     }
 
+    // Generate both Access and Refresh tokens
     const accessToken = jwt.sign(
       { id: foundUser._id, role: foundUser.role || "User" },
       secret,
-      { expiresIn: "1h" }
+      { expiresIn: "1h" },
     );
 
     const refreshToken = jwt.sign(
       { id: foundUser._id },
       process.env.REFRESH_SECRET || "refresh_secret",
-      { expiresIn: "7d" }
+      { expiresIn: "7d" },
     );
 
     const { password: _, ...userData } = foundUser.toObject();
 
-    // Set cookies
+    // Set secure, HTTP-only cookies to prevent XSS attacks
     res.cookie("accessToken", accessToken, {
       httpOnly: true,
       secure: true,
       sameSite: "None",
-      maxAge: 3600000, // 1h
+      maxAge: 3600000, // 1 hour
     });
 
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       secure: true,
       sameSite: "None",
-      maxAge: 7 * 24 * 3600000, // 7d
+      maxAge: 7 * 24 * 3600000, // 7 days
     });
 
     res.status(200).json({
@@ -131,20 +139,24 @@ const LoginUser = async (req, res) => {
   }
 };
 
-// ===================== Refresh Token =====================
+// Exchange a valid refresh token for a brand new access token
 const RefreshToken = async (req, res) => {
   const refreshToken = req.cookies.refreshToken;
-  if (!refreshToken) return res.status(401).json({ message: "No refresh token" });
+  if (!refreshToken)
+    return res.status(401).json({ message: "No refresh token" });
 
   try {
-    const decoded = jwt.verify(refreshToken, process.env.REFRESH_SECRET || "refresh_secret");
+    const decoded = jwt.verify(
+      refreshToken,
+      process.env.REFRESH_SECRET || "refresh_secret",
+    );
     const user = await UserModel.findById(decoded.id);
     if (!user) return res.status(401).json({ message: "User not found" });
 
     const newAccessToken = jwt.sign(
       { id: user._id, role: user.role || "User" },
       secret,
-      { expiresIn: "1h" }
+      { expiresIn: "1h" },
     );
 
     res.cookie("accessToken", newAccessToken, {
@@ -154,23 +166,23 @@ const RefreshToken = async (req, res) => {
       maxAge: 3600000,
     });
 
-    res.status(200).json({ 
+    res.status(200).json({
       message: "Token refreshed",
-      token: newAccessToken 
+      token: newAccessToken,
     });
   } catch (err) {
     res.status(401).json({ message: "Invalid refresh token" });
   }
 };
 
-// ===================== Logout User =====================
+// Clear authentication cookies to log the user out
 const LogoutUser = async (req, res) => {
   res.clearCookie("accessToken");
   res.clearCookie("refreshToken");
   res.status(200).json({ message: "Logged out successfully" });
 };
 
-// ===================== Update User =====================
+// Update user profile information
 const UpdateUser = async (req, res) => {
   try {
     const { name, email, bio, profilePic } = req.body;
@@ -206,3 +218,4 @@ module.exports = {
   LogoutUser,
   UpdateUser,
 };
+

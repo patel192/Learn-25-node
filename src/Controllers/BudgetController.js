@@ -1,4 +1,11 @@
 const BudgetModel = require("../models/BudgetModel");
+
+/**
+ * --- BUDGET CONTROLLER ---
+ * Helps users set and track their spending limits.
+ */
+
+// Save a new budget goal
 const AddBudget = async (req, res) => {
   try {
     const AddedBudget = await BudgetModel.create(req.body);
@@ -12,6 +19,8 @@ const AddBudget = async (req, res) => {
     });
   }
 };
+
+// Fetch every budget defined in the system
 const GetAllbudget = async (req, res) => {
   try {
     const Allbudget = await BudgetModel.find().populate("categoryID");
@@ -25,6 +34,8 @@ const GetAllbudget = async (req, res) => {
     });
   }
 };
+
+// Look up a specific budget by ID
 const GetBudgetbyID = async (req, res) => {
   try {
     const BudgetbyId = await BudgetModel.findById(req.params.id);
@@ -38,9 +49,11 @@ const GetBudgetbyID = async (req, res) => {
     });
   }
 };
+
+// Remove a budget from the database
 const DeleteBudget = async (req, res) => {
   try {
-    const Deleteduser = await BudgetModel.findByIdAndDelete(req.params.id);
+    await BudgetModel.findByIdAndDelete(req.params.id);
     res.status(200).json({
       message: "the budget removed successfully",
     });
@@ -50,11 +63,14 @@ const DeleteBudget = async (req, res) => {
     });
   }
 };
+
+// Get all the budget plans for a specific user
 const GetBudgetbyUserID = async (req, res) => {
   try {
     const BudgetbyUserID = await BudgetModel.find({
       userID: req.params.userId,
     }).populate("userID categoryID");
+
     if (BudgetbyUserID.length === 0) {
       res.status(404).json({
         message: "No Budget Found",
@@ -71,6 +87,7 @@ const GetBudgetbyUserID = async (req, res) => {
     });
   }
 };
+
 module.exports = {
   AddBudget,
   GetAllbudget,
@@ -78,3 +95,4 @@ module.exports = {
   DeleteBudget,
   GetBudgetbyUserID,
 };
+

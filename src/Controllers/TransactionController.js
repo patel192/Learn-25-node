@@ -1,4 +1,11 @@
 const TransactionModel = require("../models/TransactionModel");
+
+/**
+ * --- TRANSACTION CONTROLLER ---
+ * Broad handler for any kind of money movement in the system.
+ */
+
+// Record a new transaction
 const AddTransaction = async (req, res) => {
   try {
     const AddeTransaction = await TransactionModel.create(req.body);
@@ -12,6 +19,8 @@ const AddTransaction = async (req, res) => {
     });
   }
 };
+
+// Fetch every transaction recorded (admin use)
 const GetAlltransaction = async (req, res) => {
   try {
     const AllTransaction = await TransactionModel.find().populate("userID");
@@ -25,6 +34,8 @@ const GetAlltransaction = async (req, res) => {
     });
   }
 };
+
+// Get details for one specific transaction
 const GettransactionbyID = async (req, res) => {
   try {
     const TransactionbyID = await TransactionModel.findById(req.params.id);
@@ -38,11 +49,11 @@ const GettransactionbyID = async (req, res) => {
     });
   }
 };
+
+// Remove a transaction entry
 const DeleteTransaction = async (req, res) => {
   try {
-    const DeletedTransaction = await TransactionModel.findByIdAndDelete(
-      req.params.id
-    );
+    await TransactionModel.findByIdAndDelete(req.params.id);
     res.status(200).json({
       message: "the transaction deleted successfully",
     });
@@ -52,6 +63,8 @@ const DeleteTransaction = async (req, res) => {
     });
   }
 };
+
+// Get all the transactions for a specific user
 const TransactionByUserId = async (req, res) => {
   try {
     const Transactions = await TransactionModel.find({
@@ -67,10 +80,12 @@ const TransactionByUserId = async (req, res) => {
     });
   }
 };
+
 module.exports = {
   AddTransaction,
   GetAlltransaction,
   GettransactionbyID,
   DeleteTransaction,
-  TransactionByUserId
+  TransactionByUserId,
 };
+

@@ -3,6 +3,12 @@ const ExpenseModel = require("../models/ExpenseModel");
 const IncomeModel = require("../models/IncomeModel");
 const AllInsightModel = require("../models/AllInsightModel");
 
+/**
+ * --- AI CONTROLLER ---
+ * The brain of the app. Handles AI-powered insights, budgeting, and chat.
+ */
+
+// Helper: Save AI generated content to the database for history
 const saveInsight = async (userId, type, content) => {
   try {
     await AllInsightModel.create({
@@ -15,10 +21,9 @@ const saveInsight = async (userId, type, content) => {
   }
 };
 
-// ===============================
-// AI Chat
-// ===============================
+// --- AI CHAT INTERFACE ---
 
+// Standard chat endpoint for general financial questions
 const askAI = async (req, res) => {
   try {
     const { message, userId } = req.body;
@@ -35,7 +40,6 @@ const askAI = async (req, res) => {
     });
   } catch (error) {
     console.error("AI ERROR:", error);
-
     res.status(500).json({
       success: false,
       error: error.message,
@@ -43,16 +47,15 @@ const askAI = async (req, res) => {
   }
 };
 
-// ===============================
-// Expense Insights
-// ===============================
+// --- FINANCIAL ANALYSIS ---
 
+// Analyze spending patterns by category and provide feedback
 const getExpenseInsights = async (req, res) => {
   try {
     const { userId } = req.params;
 
     const expenses = await ExpenseModel.find({ userID: userId }).populate(
-      "categoryID"
+      "categoryID",
     );
 
     if (!expenses.length) {
@@ -62,6 +65,7 @@ const getExpenseInsights = async (req, res) => {
       });
     }
 
+    // Group expenses by category for the AI to chew on
     const summary = expenses.reduce((acc, item) => {
       const category = item.categoryID?.name || "Other";
       acc[category] = (acc[category] || 0) + item.amount;
@@ -87,7 +91,6 @@ ${JSON.stringify(summary, null, 2)}
     const aiReply = await generateAIResponse(prompt);
 
     let parsed;
-
     try {
       parsed = JSON.parse(aiReply);
     } catch {
@@ -105,7 +108,6 @@ ${JSON.stringify(summary, null, 2)}
     });
   } catch (error) {
     console.error("AI ERROR:", error);
-
     res.status(500).json({
       success: false,
       error: error.message,
@@ -113,17 +115,14 @@ ${JSON.stringify(summary, null, 2)}
   }
 };
 
-// ===============================
-// Budget Planner
-// ===============================
-
+// Generate a personalized monthly budget plan based on history
 const generateBudgetPlan = async (req, res) => {
   try {
     const { userId } = req.params;
 
     const incomes = await IncomeModel.find({ userID: userId });
     const expenses = await ExpenseModel.find({ userID: userId }).populate(
-      "categoryID"
+      "categoryID",
     );
 
     const totalIncome = incomes.reduce((sum, i) => sum + i.amount, 0);
@@ -134,10 +133,7 @@ const generateBudgetPlan = async (req, res) => {
       return acc;
     }, {});
 
-    const totalExpenses = Object.values(summary).reduce(
-      (sum, v) => sum + v,
-      0
-    );
+    const totalExpenses = Object.values(summary).reduce((sum, v) => sum + v, 0);
 
     const prompt = `
 You are a financial advisor AI.
@@ -164,10 +160,10 @@ ${JSON.stringify(summary, null, 2)}
 
     const aiReply = await generateAIResponse(prompt);
 
+    // AI sometimes wraps JSON in markdown blocks, let's clean that up
     let cleaned = aiReply.replace(/```json|```/g, "").trim();
 
     let parsed;
-
     try {
       parsed = JSON.parse(cleaned);
     } catch {
@@ -190,7 +186,6 @@ ${JSON.stringify(summary, null, 2)}
     });
   } catch (error) {
     console.error(error);
-
     res.status(500).json({
       success: false,
       error: error.message,
@@ -198,18 +193,16 @@ ${JSON.stringify(summary, null, 2)}
   }
 };
 
-// ===============================
-// Spending Risk Detection
-// ===============================
+// --- RISK AND SAVINGS ---
 
+// Spot potential overspending or dangerous financial trends
 const detectSpendingRisk = async (req, res) => {
   try {
     const { userId } = req.params;
 
     const incomes = await IncomeModel.find({ userID: userId });
-
     const expenses = await ExpenseModel.find({ userID: userId }).populate(
-      "categoryID"
+      "categoryID",
     );
 
     if (!expenses.length) {
@@ -249,11 +242,9 @@ Return JSON:
 `;
 
     const aiReply = await generateAIResponse(prompt);
-
     const cleaned = aiReply.replace(/```json|```/g, "").trim();
 
     let parsed;
-
     try {
       parsed = JSON.parse(cleaned);
     } catch {
@@ -273,7 +264,6 @@ Return JSON:
     });
   } catch (error) {
     console.error(error);
-
     res.status(500).json({
       success: false,
       error: error.message,
@@ -281,17 +271,14 @@ Return JSON:
   }
 };
 
-// ===============================
-// Financial Forecast
-// ===============================
-
+// Predict where the user might be financially in 6 months
 const getFinancialForecast = async (req, res) => {
   try {
     const { userId } = req.params;
 
     const incomes = await IncomeModel.find({ userID: userId });
     const expenses = await ExpenseModel.find({ userID: userId }).populate(
-      "categoryID"
+      "categoryID",
     );
 
     const totalIncome = incomes.reduce((sum, i) => sum + i.amount, 0);
@@ -325,7 +312,6 @@ Provide insights and recommendations.
     });
   } catch (error) {
     console.error(error);
-
     res.status(500).json({
       success: false,
       error: error.message,
@@ -333,17 +319,14 @@ Provide insights and recommendations.
   }
 };
 
-// ===============================
-// Saving Opportunities
-// ===============================
-
+// Find clever ways for the user to cut back and save money
 const detectSavingOpportunities = async (req, res) => {
   try {
     const { userId } = req.params;
 
     const incomes = await IncomeModel.find({ userID: userId });
     const expenses = await ExpenseModel.find({ userID: userId }).populate(
-      "categoryID"
+      "categoryID",
     );
 
     const totalIncome = incomes.reduce((sum, i) => sum + i.amount, 0);
@@ -373,7 +356,6 @@ ${JSON.stringify(summary, null, 2)}
     });
   } catch (error) {
     console.error(error);
-
     res.status(500).json({
       success: false,
       error: error.message,
@@ -381,22 +363,18 @@ ${JSON.stringify(summary, null, 2)}
   }
 };
 
-// ===============================
-// Financial Health Score
-// ===============================
-
+// Give a health score (0-100) based on income vs debt/spending
 const getFinancialHealthScore = async (req, res) => {
   try {
     const { userId } = req.params;
 
     const incomes = await IncomeModel.find({ userID: userId });
     const expenses = await ExpenseModel.find({ userID: userId }).populate(
-      "categoryID"
+      "categoryID",
     );
 
     const totalIncome = incomes.reduce((sum, i) => sum + i.amount, 0);
     const totalExpenses = expenses.reduce((sum, e) => sum + e.amount, 0);
-
     const savings = totalIncome - totalExpenses;
 
     const summary = expenses.reduce((acc, item) => {
@@ -426,7 +404,6 @@ ${JSON.stringify(summary, null, 2)}
     });
   } catch (error) {
     console.error(error);
-
     res.status(500).json({
       success: false,
       error: error.message,
@@ -434,7 +411,7 @@ ${JSON.stringify(summary, null, 2)}
   }
 };
 
-
+// Retrieve history of all previous AI interactions and insights
 const getAllInsights = async (req, res) => {
   try {
     const { userId } = req.params;
@@ -463,5 +440,5 @@ module.exports = {
   getFinancialForecast,
   detectSavingOpportunities,
   getFinancialHealthScore,
-  getAllInsights
-};
+  getAllInsights,
+};

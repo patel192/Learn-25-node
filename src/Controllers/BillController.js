@@ -1,4 +1,11 @@
 const BillModel = require("../models/BillModel");
+
+/**
+ * --- BILL CONTROLLER ---
+ * Manages utility bills and other payments.
+ */
+
+// Add a new bill to the system
 const AddBill = async (req, res) => {
   try {
     const AddedBill = await BillModel.create(req.body);
@@ -12,6 +19,8 @@ const AddBill = async (req, res) => {
     });
   }
 };
+
+// Get every bill in the database
 const GetAllBills = async (req, res) => {
   try {
     const AllBills = await BillModel.find();
@@ -25,6 +34,8 @@ const GetAllBills = async (req, res) => {
     });
   }
 };
+
+// Find a single bill using its ID
 const GetBillbyID = async (req, res) => {
   try {
     const BillbyId = await BillModel.findById(req.params.id);
@@ -38,9 +49,11 @@ const GetBillbyID = async (req, res) => {
     });
   }
 };
+
+// Wipe a bill from the records
 const DeleteBill = async (req, res) => {
   try {
-    const DeletedBill = await BillModel.findByIdAndDelete(req.params.id);
+    await BillModel.findByIdAndDelete(req.params.id);
     res.status(200).json({
       message: "the bill removed successfully",
     });
@@ -50,6 +63,8 @@ const DeleteBill = async (req, res) => {
     });
   }
 };
+
+// Pull all bills belonging to a specific user
 const GetBillbyUserID = async (req, res) => {
   try {
     const BillbyUserID = await BillModel.find({
@@ -66,6 +81,7 @@ const GetBillbyUserID = async (req, res) => {
     });
   }
 };
+
 module.exports = {
   AddBill,
   GetAllBills,
@@ -73,3 +89,4 @@ module.exports = {
   DeleteBill,
   GetBillbyUserID,
 };
+
