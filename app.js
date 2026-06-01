@@ -29,12 +29,15 @@ app.get("/health", (req, res) => {
 });
 
 
-const allowedOrigins = [
-  "http://localhost:5173",
-  "https://expense-manager-frontend-topaz.vercel.app",
-];
+const corsOptions = {
+  origin: [
+    "http://localhost:5173",
+    "https://expense-manager-frontend-topaz.vercel.app",
+  ],
+  credentials: true,
+};
 
-app.use(
+app.use(cors(corsOptions));e(
   cors({
     origin: (origin, callback) => {
       console.log("Incoming Origin:", origin);
