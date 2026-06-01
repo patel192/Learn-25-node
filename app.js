@@ -37,28 +37,8 @@ const corsOptions = {
   credentials: true,
 };
 
-app.use(cors(corsOptions));e(
-  cors({
-    origin: (origin, callback) => {
-      console.log("Incoming Origin:", origin);
-
-      if (!origin) {
-        return callback(null, true);
-      }
-
-      if (
-        allowedOrigins.includes(origin) ||
-        origin.startsWith("http://localhost") ||
-        origin.includes(".vercel.app")
-      ) {
-        return callback(null, true);
-      }
-
-      return callback(new Error(`CORS blocked: ${origin}`));
-    },
-    credentials: true,
-  })
-);
+app.use(cors(corsOptions));
+app.options("*", cors(corsOptions));
 
 // --- API ROUTES ---
 // Registering all the different modules of the app
