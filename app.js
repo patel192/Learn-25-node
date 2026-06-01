@@ -28,8 +28,7 @@ app.get("/health", (req, res) => {
   res.status(200).json({ status: "ok" });
 });
 
-// --- CORS CONFIGURATION ---
-// We only want to allow requests from our trusted frontend apps
+
 const allowedOrigins = [
   "http://localhost:5173",
   "https://expense-manager-frontend-topaz.vercel.app",
@@ -37,23 +36,25 @@ const allowedOrigins = [
 
 app.use(
   cors({
-    origin: function (origin, callback) {
-      // allow requests with no origin (like mobile apps or curl requests)
-      if (!origin) return callback(null, true);
+    origin: (origin, callback) => {
+      console.log("Incoming Origin:", origin);
 
-      // Check if the origin is allowed or if it's a local/preview build
+      if (!origin) {
+        return callback(null, true);
+      }
+
       if (
         allowedOrigins.includes(origin) ||
         origin.startsWith("http://localhost") ||
-        /\.vercel\.app$/.test(origin)
+        origin.includes(".vercel.app")
       ) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
+        return callback(null, true);
       }
+
+      return callback(new Error(`CORS blocked: ${origin}`));
     },
-    credentials: true, // Need this for cookies to work across domains
-  }),
+    credentials: true,
+  })
 );
 
 // --- API ROUTES ---
