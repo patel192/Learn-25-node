@@ -32,7 +32,7 @@ app.get("/health", (req, res) => {
 // We only want to allow requests from our trusted frontend apps
 const allowedOrigins = [
   "http://localhost:5173",
-  "https://expense-manager-frontend-sw2e.vercel.app",
+  "https://expense-manager-frontend-topaz.vercel.app",
 ];
 
 app.use(
