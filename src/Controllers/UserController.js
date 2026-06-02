@@ -113,18 +113,20 @@ const LoginUser = async (req, res) => {
 
     // Set secure, HTTP-only cookies to prevent XSS attacks
     res.cookie("accessToken", accessToken, {
-      httpOnly: true,
-      secure: true,
-      sameSite: "None",
-      maxAge: 3600000, // 1 hour
-    });
+  httpOnly: true,
+  secure: true,
+  sameSite: "None",
+  path: "/",
+  maxAge: 3600000,
+});
 
-    res.cookie("refreshToken", refreshToken, {
-      httpOnly: true,
-      secure: true,
-      sameSite: "None",
-      maxAge: 7 * 24 * 3600000, // 7 days
-    });
+res.cookie("refreshToken", refreshToken, {
+  httpOnly: true,
+  secure: true,
+  sameSite: "None",
+  path: "/",
+  maxAge: 7 * 24 * 3600000,
+});
 
     res.status(200).json({
       message: "Login successful",
