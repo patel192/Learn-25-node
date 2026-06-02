@@ -110,23 +110,22 @@ const LoginUser = async (req, res) => {
     );
 
     const { password: _, ...userData } = foundUser.toObject();
+    const cookieOptions = {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+      path: "/",
+    };
 
-    // Set secure, HTTP-only cookies to prevent XSS attacks
     res.cookie("accessToken", accessToken, {
-  httpOnly: true,
-  secure: true,
-  sameSite: "None",
-  path: "/",
-  maxAge: 3600000,
-});
+      ...cookieOptions,
+      maxAge: 3600000,
+    });
 
-res.cookie("refreshToken", refreshToken, {
-  httpOnly: true,
-  secure: true,
-  sameSite: "None",
-  path: "/",
-  maxAge: 7 * 24 * 3600000,
-});
+    res.cookie("refreshToken", refreshToken, {
+      ...cookieOptions,
+      maxAge: 7 * 24 * 3600000,
+    });
 
     res.status(200).json({
       message: "Login successful",
@@ -220,4 +219,3 @@ module.exports = {
   LogoutUser,
   UpdateUser,
 };
-
