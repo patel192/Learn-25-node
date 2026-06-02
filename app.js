@@ -18,6 +18,10 @@ const reportRoutes = require("./src/routes/ReportRoutes");
 
 const app = express();
 
+// Enable trust proxy so Express knows it is behind a reverse proxy (e.g. Render)
+// and correctly sets the Secure flag on cookies.
+app.set("trust proxy", 1);
+
 // --- BASIC MIDDLEWARE ---
 // Standard stuff to handle JSON and cookies
 app.use(express.json());
