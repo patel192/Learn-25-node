@@ -1,7 +1,8 @@
 const UserModel = require("../models/UserModel");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-
+const { PutObjectCommand } = require("@aws-sdk/client-s3");
+const s3 = require("../config/s3");
 const secret = process.env.JWT_SECRET;
 
 /**
@@ -215,6 +216,50 @@ const UpdateUser = async (req, res) => {
   }
 };
 
+//Util function to upload profile picture to s3
+const UploadProfilePic = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        message: "No file uploaded",
+      });
+    }
+
+    const fileName = `profiles/${Date.now()}-${req.file.originalname}`;
+
+    await s3.send(
+      new PutObjectCommand({
+        Bucket: process.env.AWS_BUCKET_NAME,
+        Key: fileName,
+        Body: req.file.buffer,
+        ContentType: req.file.mimetype,
+      }),
+    );
+
+    const imageUrl =
+      `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${fileName}`;
+
+    const updatedUser = await UserModel.findByIdAndUpdate(
+      req.params.id,
+      {
+        profilePic: imageUrl,
+      },
+      { new: true },
+    );
+
+    res.status(200).json({
+      message: "Profile image uploaded successfully",
+      data: updatedUser,
+    });
+  } catch (err) {
+    res.status(500).json({
+      message: "Upload failed",
+      error: err.message,
+    });
+  }
+};
+
+
 module.exports = {
   GetAllusers,
   GetuserbyId,
@@ -224,4 +269,6 @@ module.exports = {
   RefreshToken,
   LogoutUser,
   UpdateUser,
+  UploadProfilePic
 };
+
