@@ -1,7 +1,7 @@
 const UserModel = require("../models/UserModel");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const { PutObjectCommand } = require("@aws-sdk/client-s3");
+const { PutObjectCommand, DeleteObjectCommand } = require("@aws-sdk/client-s3");
 const s3 = require("../config/s3");
 const secret = process.env.JWT_SECRET;
 
@@ -216,6 +216,17 @@ const UpdateUser = async (req, res) => {
   }
 };
 
+// Helper: Extract the S3 object key from a full S3 URL
+const extractS3Key = (url) => {
+  try {
+    const urlObj = new URL(url);
+    // The key is the pathname without the leading slash
+    return urlObj.pathname.substring(1);
+  } catch {
+    return null;
+  }
+};
+
 //Util function to upload profile picture to s3
 const UploadProfilePic = async (req, res) => {
   try {
@@ -223,6 +234,30 @@ const UploadProfilePic = async (req, res) => {
       return res.status(400).json({
         message: "No file uploaded",
       });
+    }
+
+    // Fetch current user to check for an existing profile picture
+    const currentUser = await UserModel.findById(req.params.id);
+    if (!currentUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Delete the old profile pic from S3 if one exists
+    if (currentUser.profilePic) {
+      const oldKey = extractS3Key(currentUser.profilePic);
+      if (oldKey) {
+        try {
+          await s3.send(
+            new DeleteObjectCommand({
+              Bucket: process.env.AWS_BUCKET_NAME,
+              Key: oldKey,
+            }),
+          );
+        } catch (deleteErr) {
+          // Log but don't block the upload if old image deletion fails
+          console.error("Failed to delete old profile pic from S3:", deleteErr.message);
+        }
+      }
     }
 
     const fileName = `profiles/${Date.now()}-${req.file.originalname}`;
