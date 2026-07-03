@@ -1,26 +1,11 @@
 const routes = require("express").Router();
 const BudgetController = require("../Controllers/BudgetController");
-const authMiddleware = require("../middleware/authMiddleware");
+const {requireAuth,requireRole} = require("../middleware/auth.middleware");
 
-// --- BUDGETING ENDPOINTS ---
+routes.post("/budget", requireAuth, BudgetController.AddBudget);
+routes.get("/budgets", requireAuth,requireRole("Admin"), BudgetController.GetAllbudget);
+routes.get("/budget/:id", requireAuth, BudgetController.GetBudgetbyID);
+routes.delete("/budget/:id", requireAuth, BudgetController.DeleteBudget);
+routes.get("/budgets/me",requireAuth,BudgetController.GetBudgetbyUserID,);
 
-// Set a new spending goal
-routes.post("/budget", authMiddleware, BudgetController.AddBudget);
-
-// List all budgets
-routes.get("/budgets", authMiddleware, BudgetController.GetAllbudget);
-
-// Get details for one specific budget
-routes.get("/budget/:id", authMiddleware, BudgetController.GetBudgetbyID);
-
-// Delete a budget plan
-routes.delete("/budget/:id", authMiddleware, BudgetController.DeleteBudget);
-
-// Get all budget goals assigned to a user
-routes.get(
-  "/budgetsbyUserID/:userId",
-  authMiddleware,
-  BudgetController.GetBudgetbyUserID,
-);
-
-module.exports = routes;
+module.exports = routes;

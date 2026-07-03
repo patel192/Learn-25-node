@@ -1,11 +1,6 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
-/**
- * --- INCOME MODEL ---
- * Represents money earned by the user (Salary, Bonus, etc.).
- */
-
 const IncomeSchema = new Schema(
   {
     userID: {
@@ -29,4 +24,8 @@ const IncomeSchema = new Schema(
   },
 );
 
-module.exports = mongoose.model("income", IncomeSchema);
+IncomeSchema.index({
+  userID:1,
+  date:-1
+});
+module.exports = mongoose.model("income", IncomeSchema);

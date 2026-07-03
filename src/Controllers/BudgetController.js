@@ -1,14 +1,9 @@
 const BudgetModel = require("../models/BudgetModel");
 
-/**
- * --- BUDGET CONTROLLER ---
- * Helps users set and track their spending limits.
- */
-
-// Save a new budget goal
 const AddBudget = async (req, res) => {
+  const budgetData = {...req.body,userID:req.user.id};
   try {
-    const AddedBudget = await BudgetModel.create(req.body);
+    const AddedBudget = await BudgetModel.create(budgetData);
     res.status(201).json({
       message: "the budget is added successfully",
       data: AddedBudget,
@@ -20,7 +15,6 @@ const AddBudget = async (req, res) => {
   }
 };
 
-// Fetch every budget defined in the system
 const GetAllbudget = async (req, res) => {
   try {
     const Allbudget = await BudgetModel.find().populate("categoryID");
@@ -35,10 +29,19 @@ const GetAllbudget = async (req, res) => {
   }
 };
 
-// Look up a specific budget by ID
 const GetBudgetbyID = async (req, res) => {
   try {
     const BudgetbyId = await BudgetModel.findById(req.params.id);
+    if(!BudgetbyId){
+      return res.status(404).json({
+        message:"Budget not found"
+      });
+    }
+    if(BudgetbyId.userID.toString() !== req.user.id){
+      return res.status(403).json({
+        message:"Forbidden"
+      });
+    }
     res.status(200).json({
       message: "the budget found successfully",
       data: BudgetbyId,
@@ -50,9 +53,19 @@ const GetBudgetbyID = async (req, res) => {
   }
 };
 
-// Remove a budget from the database
 const DeleteBudget = async (req, res) => {
   try {
+    const budget = await BudgetModel.findById(req.params.id);
+    if(!budget){
+      return res.status(404).json({
+        message:"Budget not found"
+      });
+    }
+    if(budget.userID.toString() !== req.user.id){
+      return res.status(403).json({
+        message:"Forbidden"
+      });
+    }
     await BudgetModel.findByIdAndDelete(req.params.id);
     res.status(200).json({
       message: "the budget removed successfully",
@@ -64,11 +77,11 @@ const DeleteBudget = async (req, res) => {
   }
 };
 
-// Get all the budget plans for a specific user
 const GetBudgetbyUserID = async (req, res) => {
   try {
+    const userId = req.user.id;
     const BudgetbyUserID = await BudgetModel.find({
-      userID: req.params.userId,
+      userID: userId,
     }).populate("userID categoryID");
 
     if (BudgetbyUserID.length === 0) {

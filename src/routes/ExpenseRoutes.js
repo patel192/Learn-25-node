@@ -1,26 +1,14 @@
 const routes = require("express").Router();
 const Expensecontroller = require("../Controllers/ExepenseController");
-const authMiddleware = require("../middleware/authMiddleware");
+const {requireAuth,requireRole} = require("../middleware/auth.middleware");
 
-// --- EXPENSE ENDPOINTS ---
+routes.post("/expense", requireAuth, Expensecontroller.AddExpense);
+routes.get("/expenses", requireAuth,requireRole("Admin"),Expensecontroller.GetAllExpenses);
+routes.get("/expense/:id", requireAuth, Expensecontroller.GetExpensebyID);
+routes.put("/expense/:id", requireAuth, Expensecontroller.UpdateExpense);
+routes.delete("/expense/:id", requireAuth, Expensecontroller.DeleteExpense);
 
-// Standard CRUD operations
-routes.post("/expense", authMiddleware, Expensecontroller.AddExpense);
-routes.get("/expenses", authMiddleware, Expensecontroller.GetAllExpenses);
-routes.get("/expense/:id", authMiddleware, Expensecontroller.GetExpensebyID);
-routes.put("/expense/:id", authMiddleware, Expensecontroller.UpdateExpense);
-routes.delete("/expense/:id", authMiddleware, Expensecontroller.DeleteExpense);
+routes.get("/expenses/me",requireAuth,Expensecontroller.GetExpensebyUserId,);
+routes.get("/expenses/recent",requireAuth,Expensecontroller.GetRecentExpenses,);
 
-// Specialized filters and lookups
-routes.get(
-  "/expensesbyUserID/:userId",
-  authMiddleware,
-  Expensecontroller.GetExpensebyUserId,
-);
-routes.get(
-  "/recent-expense/:userId",
-  authMiddleware,
-  Expensecontroller.GetRecentExpenses,
-);
-
-module.exports = routes;
+module.exports = routes;

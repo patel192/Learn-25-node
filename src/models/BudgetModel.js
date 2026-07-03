@@ -1,11 +1,6 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
-/**
- * --- BUDGET MODEL ---
- * Stores the spending limits set by users for specific categories.
- */
-
 const BudgetSchema = new Schema(
   {
     userID: {
@@ -31,4 +26,13 @@ const BudgetSchema = new Schema(
   },
 );
 
-module.exports = mongoose.model("budget", BudgetSchema);
+BudgetSchema.index({
+  userID:1,
+  categoryID:1
+});
+BudgetSchema.index({
+  userID:1,
+  start_date: -1
+});
+
+module.exports = mongoose.model("budget", BudgetSchema);

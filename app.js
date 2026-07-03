@@ -1,9 +1,12 @@
 const express = require("express");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
+const helmet = require("helmet");
+const rateLimit = require("express-rate-limit");
+const mongoSanitize = require("express-mongo-sanitize");
+const morgan = require("morgan");
 require("dotenv").config();
 
-// --- ROUTE IMPORTS ---
 const userRoutes = require("./src/routes/UserRoutes");
 const categoryRoutes = require("./src/routes/CategoryRoutes");
 const expenseRoutes = require("./src/routes/ExpenseRoutes");
@@ -15,23 +18,8 @@ const systemlogRoutes = require("./src/routes/SystemlogRoutes");
 const billRoutes = require("./src/routes/BillRoutes");
 const aiRoutes = require("./src/routes/aiRoutes");
 const reportRoutes = require("./src/routes/ReportRoutes");
-
+const errorHandler = require("./src/middleware/error.middleware");
 const app = express();
-
-// Enable trust proxy so Express knows it is behind a reverse proxy (e.g. Render)
-// and correctly sets the Secure flag on cookies.
-app.set("trust proxy", 1);
-
-// --- BASIC MIDDLEWARE ---
-// Standard stuff to handle JSON and cookies
-app.use(express.json());
-app.use(cookieParser());
-
-// Just a quick check to see if the server is breathing
-app.get("/health", (req, res) => {
-  res.status(200).json({ status: "ok" });
-});
-
 
 const corsOptions = {
   origin: [
@@ -40,12 +28,26 @@ const corsOptions = {
   ],
   credentials: true,
 };
-
+const authLimiter = rateLimit({
+  windowMs:15*60*1000,
+  max:20,
+  message:{
+    success:false,
+    message:"Too many requests.Please try again later."
+  },
+});
+app.set("trust proxy", 1);
+app.use(helmet());
+app.use(morgan("combined"));
+app.use(mongoSanitize());
+app.use(express.json());
+app.use(cookieParser());
 app.use(cors(corsOptions));
 app.options("*", cors(corsOptions));
-
-// --- API ROUTES ---
-// Registering all the different modules of the app
+app.use("/api/user",authLimiter);
+app.get("/health", (req, res) => {
+  res.status(200).json({ status: "ok" });
+});
 app.use("/api", categoryRoutes);
 app.use("/api", userRoutes);
 app.use("/api", expenseRoutes);
@@ -57,7 +59,7 @@ app.use("/api", systemlogRoutes);
 app.use("/api", billRoutes);
 app.use("/api/ai", aiRoutes);
 app.use("/api", reportRoutes);
+app.use(errorHandler);
 
-// Exporting so the server or tests can pick it up
 module.exports = app;
 
