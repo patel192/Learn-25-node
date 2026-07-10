@@ -2,20 +2,24 @@ const PDFDocument = require("pdfkit");
 const ExpenseModel = require("../models/ExpenseModel");
 const IncomeModel = require("../models/IncomeModel");
 
-/**
- * --- REPORT CONTROLLER ---
- * Generates downloadable PDF reports of a user's financial status.
- */
-
-// Generate a full financial summary as a PDF file
 const generateReport = async (req, res) => {
   try {
-    const userId = req.params.userId;
+    const userId = req.user.id;
 
     // Grab all the data for this user
-    const expenses = await ExpenseModel.find({ userId });
-    const incomes = await IncomeModel.find({ userId });
+    const expenses = await ExpenseModel.find({
+      userID: userId,
+    }).sort({ date: -1 });
 
+    const incomes = await IncomeModel.find({
+      userID: userId,
+    }).sort({ date: -1 });
+
+    if (expenses.length === 0 && incomes.length === 0) {
+      return res.status(404).json({
+        message: "No financial data found",
+      });
+    }
     // Calculate the totals for the summary section
     const totalIncome = incomes.reduce((a, i) => a + i.amount, 0);
     const totalExpense = expenses.reduce((a, e) => a + e.amount, 0);
@@ -47,7 +51,7 @@ const generateReport = async (req, res) => {
 
     // List each individual expense
     expenses.forEach((e) => {
-      doc.fontSize(12).text(`${e.title} - ₹${e.amount}`);
+      doc.fontSize(12).text(`${e.description} - ₹${e.amount}`);
     });
 
     // Finalize the PDF file
@@ -61,4 +65,4 @@ const generateReport = async (req, res) => {
   }
 };
 
-module.exports = { generateReport };
+module.exports = { generateReport };

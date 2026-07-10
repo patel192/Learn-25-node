@@ -1,12 +1,8 @@
 const errorHandler = (err,req,res,next) => {
-    console.log("Error:",err);
-
-    const statusCode = err.statusCode || 500;
-    const message = err.message || "Internal Server Error";
-
-    res.status(statusCode).json({
+    console.error(err);
+    return res.status(err.statusCode || 500).json({
         success:false,
-        message:process.env.NODE_ENV === "production" && statusCode === 500 ? "Internal Server Error" : message,
+        message:err.message || "Interval server Error",
     });
-};
+}
 module.exports = errorHandler;

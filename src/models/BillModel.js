@@ -1,11 +1,6 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
-/**
- * --- BILL MODEL ---
- * Represets a utility bill or any recurring payment due.
- */
-
 const BillSchema = new Schema(
   {
     userID: {
@@ -36,4 +31,13 @@ const BillSchema = new Schema(
   },
 );
 
-module.exports = mongoose.model("bill", BillSchema);
+BillSchema.index({
+  userID:1,
+  dueDate:1
+});
+BillSchema.index({
+  userID:1,
+  status:1
+});
+
+module.exports = mongoose.model("bill", BillSchema);

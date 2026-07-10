@@ -2,9 +2,11 @@ const routes = require("express").Router();
 const UserController = require("../Controllers/UserController");
 const {requireAuth,requireRole } = require("../middleware/auth.middleware");
 const upload = require("../middleware/upload")
+const validate = require("../middleware/validate.middleware");
+const {signupSchema,loginSchema} = require("../user.validation");
 
-routes.post("/user", UserController.SignupUser);
-routes.post("/user/login", UserController.LoginUser);
+routes.post("/user",validate(signupSchema),UserController.SignupUser);
+routes.post("/user/login",validate(loginSchema),UserController.LoginUser);
 routes.post("/user/refresh-token", UserController.RefreshToken);
 routes.post("/user/logout", UserController.LogoutUser);
 

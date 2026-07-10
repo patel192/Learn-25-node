@@ -1,15 +1,11 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
-/**
- * --- SYSTEM LOG MODEL ---
- * Tracks events and actions within the application for auditing.
- */
-
 const SystemLogSchema = new Schema(
   {
     user: {
-      type: String, // The user involved in the action
+      type: Schema.Types.ObjectId,
+      ref:"users", // The user involved in the action
       required: true,
     },
     action: {
@@ -28,6 +24,15 @@ const SystemLogSchema = new Schema(
     timestamps: true,
   },
 );
+
+SystemLogSchema.index({
+    createdAt: -1
+});
+
+SystemLogSchema.index({
+    user: 1,
+    createdAt: -1
+});
 
 module.exports = mongoose.model("SystemLog", SystemLogSchema);
 

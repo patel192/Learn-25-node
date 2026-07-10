@@ -1,14 +1,9 @@
 const TransactionModel = require("../models/TransactionModel");
 
-/**
- * --- TRANSACTION CONTROLLER ---
- * Broad handler for any kind of money movement in the system.
- */
-
-// Record a new transaction
 const AddTransaction = async (req, res) => {
   try {
-    const AddeTransaction = await TransactionModel.create(req.body);
+    const transactionData = {...req.body,userID:req.user.id};
+    const AddeTransaction = await TransactionModel.create(transactionData);
     res.status(201).json({
       message: "the Transaction is added successfully",
       data: AddeTransaction,
@@ -20,7 +15,6 @@ const AddTransaction = async (req, res) => {
   }
 };
 
-// Fetch every transaction recorded (admin use)
 const GetAlltransaction = async (req, res) => {
   try {
     const AllTransaction = await TransactionModel.find().populate("userID");
@@ -35,9 +29,19 @@ const GetAlltransaction = async (req, res) => {
   }
 };
 
-// Get details for one specific transaction
 const GettransactionbyID = async (req, res) => {
   try {
+    const transaction = await TransactionModel.findById(req.params.id);
+    if(!transaction){
+      return res.status(404).json({
+        message:"Transaction not found"
+      });
+    }
+    if(transaction.userID.toString() !== req.user.id){
+      return res.status(403).json({
+        message:"You are not authorized to access this transaction"
+      });
+    }
     const TransactionbyID = await TransactionModel.findById(req.params.id);
     res.status(200).json({
       message: "the transaction found successfully",
@@ -50,9 +54,19 @@ const GettransactionbyID = async (req, res) => {
   }
 };
 
-// Remove a transaction entry
 const DeleteTransaction = async (req, res) => {
   try {
+    const transaction = await TransactionModel.findById(req.params.id);
+    if(!transaction){
+      return res.status(404).json({
+        message:"Transaction not found"
+      });
+    }
+    if(transaction.userID.toString() !== req.user.id){
+      return res.status(403).json({
+        message:"Forbidden: You are not authorized to delete this transaction"
+      })
+    }
     await TransactionModel.findByIdAndDelete(req.params.id);
     res.status(200).json({
       message: "the transaction deleted successfully",
@@ -64,11 +78,11 @@ const DeleteTransaction = async (req, res) => {
   }
 };
 
-// Get all the transactions for a specific user
 const TransactionByUserId = async (req, res) => {
   try {
+    const userId = req.user.id;
     const Transactions = await TransactionModel.find({
-      userID: req.params.userId,
+      userID:userId,
     });
     res.status(200).json({
       message: "Transactions Fetched Successfully",

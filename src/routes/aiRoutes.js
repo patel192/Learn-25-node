@@ -1,4 +1,5 @@
 const express = require("express");
+const {requireAuth} = require("../middleware/auth.middleware");
 const {
   askAI,
   getExpenseInsights,
@@ -18,18 +19,18 @@ const router = express.Router();
  */
 
 // General chat assistant
-router.post("/ask", askAI);
+router.post("/ask",requireAuth, askAI);
 
 // Data analysis and planning
-router.get("/expense-insights/:userId", getExpenseInsights);
-router.get("/budget-plan/:userId", generateBudgetPlan);
-router.get("/spending-risk/:userId", detectSpendingRisk);
-router.get("/financial-forecast/:userId", getFinancialForecast);
-router.get("/saving-opportunities/:userId", detectSavingOpportunities);
-router.get("/financial-health/:userId", getFinancialHealthScore);
+router.get("/expense-insights",requireAuth, getExpenseInsights);
+router.get("/budget-plan",requireAuth, generateBudgetPlan);
+router.get("/spending-risk",requireAuth, detectSpendingRisk);
+router.get("/financial-forecast",requireAuth, getFinancialForecast);
+router.get("/saving-opportunities",requireAuth, detectSavingOpportunities);
+router.get("/financial-health",requireAuth, getFinancialHealthScore);
 
 // History and metadata
-router.get("/insights/:userId", getAllInsights);
+router.get("/insights",requireAuth,getAllInsights);
 
 module.exports = router;
 

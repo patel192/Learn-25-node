@@ -1,10 +1,4 @@
 const mongoose = require("mongoose");
-
-/**
- * --- RECURRING TRANSACTION MODEL ---
- * Defines the schedule for automated transactions (Subscriptions, etc.)
- */
-
 const recurringSchema = new mongoose.Schema(
   {
     title: {
@@ -42,6 +36,15 @@ const recurringSchema = new mongoose.Schema(
     timestamps: true,
   },
 );
+recurringSchema.index({
+   userId:1,
+   nextDate:1
+});
+
+recurringSchema.index({
+   userId:1,
+   isActive:1
+});
 
 module.exports = mongoose.model("recurring", recurringSchema);
 

@@ -1,14 +1,8 @@
 const BillModel = require("../models/BillModel");
-
-/**
- * --- BILL CONTROLLER ---
- * Manages utility bills and other payments.
- */
-
-// Add a new bill to the system
 const AddBill = async (req, res) => {
   try {
-    const AddedBill = await BillModel.create(req.body);
+    const billData = {...req.body,userID:req.user.id};
+    const AddedBill = await BillModel.create(billData);
     res.status(201).json({
       message: "the bill added successfully",
       data: AddedBill,
@@ -20,7 +14,6 @@ const AddBill = async (req, res) => {
   }
 };
 
-// Get every bill in the database
 const GetAllBills = async (req, res) => {
   try {
     const AllBills = await BillModel.find();
@@ -35,10 +28,19 @@ const GetAllBills = async (req, res) => {
   }
 };
 
-// Find a single bill using its ID
 const GetBillbyID = async (req, res) => {
   try {
     const BillbyId = await BillModel.findById(req.params.id);
+    if(!BillbyId){
+      return res.status(404).json({
+        message:"Bill not found"
+      });
+    }
+    if(BillbyId.userID.toString() !== req.user.id){
+      return res.status(403).json({
+        message:"Forbidden"
+      });
+    }
     res.status(200).json({
       message: "the bill found successfully",
       data: BillbyId,
@@ -50,9 +52,20 @@ const GetBillbyID = async (req, res) => {
   }
 };
 
-// Wipe a bill from the records
 const DeleteBill = async (req, res) => {
   try {
+    const bill = await BillModel.findById(req.params.id);
+    if(!bill){
+      return res.status(404).json({
+        message:"Bill not found"
+      });
+    }
+    if(bill.userID.toString() !== req.user.id){
+      return res.status(403).json({
+        message:"Forbidden"
+      });
+    }
+
     await BillModel.findByIdAndDelete(req.params.id);
     res.status(200).json({
       message: "the bill removed successfully",
@@ -64,11 +77,11 @@ const DeleteBill = async (req, res) => {
   }
 };
 
-// Pull all bills belonging to a specific user
 const GetBillbyUserID = async (req, res) => {
   try {
+    const userId = req.user.id;
     const BillbyUserID = await BillModel.find({
-      userID: req.params.userId,
+      userID: userId,
     }).populate("userID");
 
     res.status(200).json({

@@ -1,10 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const ReportController = require("../Controllers/ReportController");
+const {requireAuth} = require("../middleware/auth.middleware");
 
-// --- FINANCIAL REPORTS ---
+router.get("/reports/me",requireAuth, ReportController.generateReport);
 
-// Generate a PDF summary for the user
-router.get("/reports/:userId", ReportController.generateReport);
-
-module.exports = router;
+module.exports = router;

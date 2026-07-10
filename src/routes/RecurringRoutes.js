@@ -1,20 +1,14 @@
 const express = require("express");
 const router = express.Router();
 const Recurring = require("../Controllers/RecurringController");
+const {requireAuth} = require("../middleware/auth.middleware");
 
-// --- RECURRING TRANSACTIONS ---
-
-// Set up a new automated/recurring transaction
-router.post("/recurring", Recurring.createRecurring);
-
-// Manage existing recurring transactions
-router.get("/recurring/:userId", Recurring.getRecurringByUser);
-router.put("/recurring/:id", Recurring.updateRecurring);
-router.delete("/recurring/:id", Recurring.deleteRecurring);
-
-// Special features: upcoming list and on/off switch
-router.get("/recurring/upcoming/:userId", Recurring.getUpcomingRecurring);
-router.patch("/recurring/toggle/:id", Recurring.toggleRecurringStatus);
+router.post("/recurring",requireAuth,Recurring.createRecurring);
+router.get("/recurring/me",requireAuth,Recurring.getRecurringByUser);
+router.put("/recurring/:id", requireAuth, Recurring.updateRecurring);
+router.delete("/recurring/:id", requireAuth, Recurring.deleteRecurring);
+router.get("/recurring/upcoming", requireAuth, Recurring.getUpcomingRecurring);
+router.patch("/recurring/toggle/:id", requireAuth, Recurring.toggleRecurringStatus);
 
 module.exports = router;
 

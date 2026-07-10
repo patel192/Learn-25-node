@@ -1,26 +1,11 @@
 const routes = require("express").Router();
 const Billcontroller = require("../Controllers/BillController");
-const authMiddleware = require("../middleware/authMiddleware");
+const {requireAuth,requireRole} = require("../middleware/auth.middleware");
 
-// --- BILLING ENDPOINTS ---
+routes.post("/bill", requireAuth, Billcontroller.AddBill);
+routes.get("/bills", requireAuth,requireRole("Admin"), Billcontroller.GetAllBills);
+routes.delete("/bill/:id", requireAuth, Billcontroller.DeleteBill);
+routes.get("/bill/:id", requireAuth, Billcontroller.GetBillbyID);
+routes.get("/bills/me",requireAuth,Billcontroller.GetBillbyUserID);
 
-// Record a new bill
-routes.post("/bill", authMiddleware, Billcontroller.AddBill);
-
-// Get a list of all bills
-routes.get("/bills", authMiddleware, Billcontroller.GetAllBills);
-
-// Remove a specific bill
-routes.delete("/bill/:id", authMiddleware, Billcontroller.DeleteBill);
-
-// Look up details for one bill
-routes.get("/bill/:id", authMiddleware, Billcontroller.GetBillbyID);
-
-// Fetch every bill that belongs to a specific user
-routes.get(
-  "/billByuserId/:userId",
-  authMiddleware,
-  Billcontroller.GetBillbyUserID,
-);
-
-module.exports = routes;
+module.exports = routes;

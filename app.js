@@ -36,6 +36,16 @@ const authLimiter = rateLimit({
     message:"Too many requests.Please try again later."
   },
 });
+const aiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 20,
+  message: {
+    success: false,
+    message: "AI request limit exceeded. Please try again after 15 minutes.",
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 app.set("trust proxy", 1);
 app.use(helmet());
 app.use(morgan("combined"));
@@ -44,6 +54,7 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(cors(corsOptions));
 app.options("*", cors(corsOptions));
+app.use("/api/ai", aiRoutes);
 app.use("/api/user",authLimiter);
 app.get("/health", (req, res) => {
   res.status(200).json({ status: "ok" });
@@ -57,7 +68,7 @@ app.use("/api", transactionRoutes);
 app.use("/api", budgetRoutes);
 app.use("/api", systemlogRoutes);
 app.use("/api", billRoutes);
-app.use("/api/ai", aiRoutes);
+app.use("/api/ai", aiLimiter);
 app.use("/api", reportRoutes);
 app.use(errorHandler);
 

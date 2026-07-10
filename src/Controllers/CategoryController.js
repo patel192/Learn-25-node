@@ -1,13 +1,16 @@
 const CategoryModel = require("../models/CategoryModel");
 
-/**
- * --- CATEGORY CONTROLLER ---
- * Manages types of expenses/income like "Food", "Rent", or "Salary".
- */
-
-// Create a new category tag
 const AddCategory = async (req, res) => {
   try {
+    const existing = await CategoryModel.findOne({
+      name:req.body.name,
+      type:req.body.type
+    });
+    if(!existing){
+      return res.status(409).json({
+        message:"Category already exists"
+      });
+    }
     const AddedCategory = await CategoryModel.create(req.body);
     res.status(201).json({
       message: "the category added successfully",
@@ -20,7 +23,6 @@ const AddCategory = async (req, res) => {
   }
 };
 
-// List all available categories
 const GetAllCategory = async (req, res) => {
   try {
     const Allcategory = await CategoryModel.find();
@@ -35,10 +37,14 @@ const GetAllCategory = async (req, res) => {
   }
 };
 
-// Get details for one specific category
 const GetCategorybyID = async (req, res) => {
   try {
     const CategorybyID = await CategoryModel.findById(req.params.id);
+    if(!CategorybyID){
+      return res.status(404).json({
+        message:"Category not found"
+      });
+    }
     res.status(200).json({
       message: "the category found successfully",
       data: CategorybyID,
@@ -50,9 +56,14 @@ const GetCategorybyID = async (req, res) => {
   }
 };
 
-// Delete a category from the system
 const DeleteCategory = async (req, res) => {
   try {
+    const category = await CategoryModel.findById(req.params.id);
+    if(!category){
+      return res.status(404).json({
+        message:"Category not found"
+      });
+    }
     await CategoryModel.findByIdAndDelete(req.params.id);
     res.status(200).json({
       message: "the Category deleted successfully",
@@ -69,4 +80,4 @@ module.exports = {
   GetAllCategory,
   GetCategorybyID,
   DeleteCategory,
-};
+};

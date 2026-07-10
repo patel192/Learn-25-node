@@ -1,11 +1,4 @@
 const RecurringModel = require("../models/RecurringModel");
-
-/**
- * --- RECURRING CONTROLLER ---
- * Handles transactions that repeat, like monthly subscriptions or weekly bills.
- */
-
-// Set up a new recurring transaction schedule
 const createRecurring = async (req, res) => {
   try {
     const recurring = await RecurringModel.create(req.body);
@@ -20,12 +13,11 @@ const createRecurring = async (req, res) => {
     });
   }
 };
-
-// Fetch all recurring setups for a specific user
 const getRecurringByUser = async (req, res) => {
   try {
+    const userId = req.user.id;
     const recurring = await RecurringModel.find({
-      userId: req.params.userId,
+      userId
     });
     res.status(200).json({
       data: recurring,
@@ -37,9 +29,19 @@ const getRecurringByUser = async (req, res) => {
   }
 };
 
-// Stop a recurring transaction permanently
 const deleteRecurring = async (req, res) => {
   try {
+    const recurring = await RecurringModel.findById(req.params.id);
+    if(!recurring){
+      return res.status(404).json({
+        messgae:"Recurring transaction not found"
+      });
+    }
+    if(recurring.userId.toString() !== req.user.id){
+      return res.status(403).json({
+        message:"You are not authorized to delete this recurring transaction"
+      });
+    }
     await RecurringModel.findByIdAndDelete(req.params.id);
     res.status(200).json({
       message: "Recurring transaction deleted",
@@ -51,7 +53,6 @@ const deleteRecurring = async (req, res) => {
   }
 };
 
-// Modify the details of an existing recurring transaction
 const updateRecurring = async (req, res) => {
   try {
     const updated = await RecurringModel.findByIdAndUpdate(
@@ -70,12 +71,12 @@ const updateRecurring = async (req, res) => {
   }
 };
 
-// Get the next few payments that are coming due soon
 const getUpcomingRecurring = async (req, res) => {
   try {
+    const userId = req.user.id;
     const today = new Date();
     const upcoming = await RecurringModel.find({
-      userId: req.params.userId,
+      userId:userId,
       nextDate: { $gte: today },
     })
       .sort({ nextDate: 1 })
@@ -88,7 +89,6 @@ const getUpcomingRecurring = async (req, res) => {
   }
 };
 
-// Quickly turn a recurring payment on or off
 const toggleRecurringStatus = async (req, res) => {
   try {
     const recurring = await RecurringModel.findById(req.params.id);

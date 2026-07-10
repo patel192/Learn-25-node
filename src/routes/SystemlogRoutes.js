@@ -1,13 +1,9 @@
 const routes = require("express").Router();
 const { createLog, getLogs } = require("../Controllers/SystemlogController");
+const {requireAuth,requireRole} = require("../middleware/auth.middleware");
 
-// --- SYSTEM AUDIT LOGS ---
-
-// Add a new activity log entry
-routes.post("/logs", createLog);
-
-// View the history of system logs
-routes.get("/logs", getLogs);
+routes.post("/logs", requireAuth, createLog);
+routes.get("/logs", requireAuth,requireRole("Admin"),getLogs);
 
 module.exports = routes;
 

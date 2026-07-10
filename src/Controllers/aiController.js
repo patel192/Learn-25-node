@@ -3,12 +3,6 @@ const ExpenseModel = require("../models/ExpenseModel");
 const IncomeModel = require("../models/IncomeModel");
 const AllInsightModel = require("../models/AllInsightModel");
 
-/**
- * --- AI CONTROLLER ---
- * The brain of the app. Handles AI-powered insights, budgeting, and chat.
- */
-
-// Helper: Save AI generated content to the database for history
 const saveInsight = async (userId, type, content) => {
   try {
     await AllInsightModel.create({
@@ -21,12 +15,22 @@ const saveInsight = async (userId, type, content) => {
   }
 };
 
-// --- AI CHAT INTERFACE ---
 
-// Standard chat endpoint for general financial questions
 const askAI = async (req, res) => {
   try {
-    const { message, userId } = req.body;
+    const userId = req.user.id;
+    const { message } = req.body;
+    if(!message?.trim()){
+      return res.status(400).json({
+        message:"Message cannot be empty"
+      });
+    }
+    if(message.length > 3000){
+      return res.status(400).json({
+        success: false,
+        error: "Message too long. Please keep it under 3000 characters."
+      });
+    }
 
     const aiReply = await generateAIResponse(message);
 
@@ -47,12 +51,10 @@ const askAI = async (req, res) => {
   }
 };
 
-// --- FINANCIAL ANALYSIS ---
 
-// Analyze spending patterns by category and provide feedback
 const getExpenseInsights = async (req, res) => {
   try {
-    const { userId } = req.params;
+    const userId = req.user.id;
 
     const expenses = await ExpenseModel.find({ userID: userId }).populate(
       "categoryID",
@@ -65,7 +67,6 @@ const getExpenseInsights = async (req, res) => {
       });
     }
 
-    // Group expenses by category for the AI to chew on
     const summary = expenses.reduce((acc, item) => {
       const category = item.categoryID?.name || "Other";
       acc[category] = (acc[category] || 0) + item.amount;
@@ -115,10 +116,9 @@ ${JSON.stringify(summary, null, 2)}
   }
 };
 
-// Generate a personalized monthly budget plan based on history
 const generateBudgetPlan = async (req, res) => {
   try {
-    const { userId } = req.params;
+    const userId = req.user.id;
 
     const incomes = await IncomeModel.find({ userID: userId });
     const expenses = await ExpenseModel.find({ userID: userId }).populate(
@@ -160,7 +160,6 @@ ${JSON.stringify(summary, null, 2)}
 
     const aiReply = await generateAIResponse(prompt);
 
-    // AI sometimes wraps JSON in markdown blocks, let's clean that up
     let cleaned = aiReply.replace(/```json|```/g, "").trim();
 
     let parsed;
@@ -193,12 +192,10 @@ ${JSON.stringify(summary, null, 2)}
   }
 };
 
-// --- RISK AND SAVINGS ---
 
-// Spot potential overspending or dangerous financial trends
 const detectSpendingRisk = async (req, res) => {
   try {
-    const { userId } = req.params;
+    const userId = req.user.id;
 
     const incomes = await IncomeModel.find({ userID: userId });
     const expenses = await ExpenseModel.find({ userID: userId }).populate(
@@ -271,10 +268,9 @@ Return JSON:
   }
 };
 
-// Predict where the user might be financially in 6 months
 const getFinancialForecast = async (req, res) => {
   try {
-    const { userId } = req.params;
+    const userId = req.user.id;
 
     const incomes = await IncomeModel.find({ userID: userId });
     const expenses = await ExpenseModel.find({ userID: userId }).populate(
@@ -319,10 +315,9 @@ Provide insights and recommendations.
   }
 };
 
-// Find clever ways for the user to cut back and save money
 const detectSavingOpportunities = async (req, res) => {
   try {
-    const { userId } = req.params;
+    const userId = req.user.id;
 
     const incomes = await IncomeModel.find({ userID: userId });
     const expenses = await ExpenseModel.find({ userID: userId }).populate(
@@ -363,10 +358,9 @@ ${JSON.stringify(summary, null, 2)}
   }
 };
 
-// Give a health score (0-100) based on income vs debt/spending
 const getFinancialHealthScore = async (req, res) => {
   try {
-    const { userId } = req.params;
+    const userId = req.user.id;
 
     const incomes = await IncomeModel.find({ userID: userId });
     const expenses = await ExpenseModel.find({ userID: userId }).populate(
@@ -411,10 +405,9 @@ ${JSON.stringify(summary, null, 2)}
   }
 };
 
-// Retrieve history of all previous AI interactions and insights
 const getAllInsights = async (req, res) => {
   try {
-    const { userId } = req.params;
+    const userId = req.user.id;
 
     const insights = await AllInsightModel.find({ userID: userId }).sort({
       createdAt: -1,
@@ -441,4 +434,4 @@ module.exports = {
   detectSavingOpportunities,
   getFinancialHealthScore,
   getAllInsights,
-};
+};

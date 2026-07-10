@@ -1,11 +1,6 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
-/**
- * --- TRANSACTION MODEL ---
- * A generic record for any kind of financial movement.
- */
-
 const TransactionSchema = new Schema(
   {
     userID: {
@@ -32,4 +27,13 @@ const TransactionSchema = new Schema(
   },
 );
 
-module.exports = mongoose.model("transaction", TransactionSchema);
+
+TransactionSchema.index({
+  userID:1,
+  date:-1
+});
+TransactionSchema.index({
+  userID:1,
+  type:1
+});
+module.exports = mongoose.model("transaction", TransactionSchema);
