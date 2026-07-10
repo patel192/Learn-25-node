@@ -6,12 +6,11 @@ const s3 = require("../config/s3");
 const NotFoundError = require("../errors/NotFoundError");
 const ConflictError = require("../errors/ConflictError");
 const UnauthorizedError = require("../errors/UnauthorizedError");
-const VaidationError = require("../errors/VallidationError");
+const ValidationError = require("../errors/ValidationError");
 
 const extractS3Key = (url) => {
   try {
     const urlObj = new URL(url);
-    // The key is the pathname without the leading slash
     return urlObj.pathname.substring(1);
   } catch {
     return null;
@@ -137,7 +136,7 @@ const updateUser = async (id, data) => {
 
 const uploadProfilePicture = async (id, file) => {
   if (!file) {
-    throw new ValidationError(res, 404, "No file uploaded");
+    throw new ValidationError("No file uploaded");
   }
   const currentUser = await UserModel.findById(id);
   if (!currentUser) {
@@ -164,7 +163,6 @@ const uploadProfilePicture = async (id, file) => {
   }
 
   const fileName = `profiles/${Date.now()}-${file.originalname}`;
-  try {
     await s3.send(
       new PutObjectCommand({
         Bucket: process.env.AWS_BUCKET_NAME,
@@ -173,10 +171,6 @@ const uploadProfilePicture = async (id, file) => {
         ContentType: file.mimetype,
       }),
     );
-  } catch (err) {
-    console.log(err);
-    throw err;
-  }
   const imageUrl = `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${fileName}`;
 
   const updatedUser = await UserModel.findByIdAndUpdate(

@@ -1,11 +1,5 @@
-const UserModel = require("../models/UserModel");
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
-
-const secret = process.env.JWT_SECRET;
-const { sendSuccess, sendError } = require("../utiles/response");
+const { sendSuccess } = require("../utiles/response");
 const asyncHandler = require("../middleware/asyncHandler");
-const NotFoundError = require("../errors/NotFoundError");
 const UserService = require("../services/user.service");
 
 const GetAllusers = asyncHandler(async (req, res) => {
@@ -51,7 +45,7 @@ const LoginUser = asyncHandler(async (req, res) => {
 
   res.cookie("refreshToken", result.refreshToken, {
     ...cookieOptions,
-    maxAge: 7 * 24 * 36000000,
+    maxAge: 7 * 24 * 60 * 60 * 1000,
   });
 
   return sendSuccess(res, 200, "Login Successfully", {
@@ -72,7 +66,7 @@ const RefreshToken = asyncHandler(async (req, res) => {
 });
 
 // Clear authentication cookies to log the user out
-const LogoutUser = async (req, res) => {
+const LogoutUser = (req, res) => {
   const cookieOptions = {
     httpOnly: true,
     secure: true,
