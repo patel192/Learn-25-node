@@ -1,99 +1,36 @@
-const BillModel = require("../models/BillModel");
-const AddBill = async (req, res) => {
-  try {
-    const billData = {...req.body,userID:req.user.id};
-    const AddedBill = await BillModel.create(billData);
-    res.status(201).json({
-      message: "the bill added successfully",
-      data: AddedBill,
-    });
-  } catch (err) {
-    res.status(500).json({
-      message: err.message,
-    });
-  }
-};
+const asyncHandler = require("../middleware/asyncHandler");
+const BillService = require("../services/bill.service");
+const {sendSuccess} = require("../utiles/response");
 
-const GetAllBills = async (req, res) => {
-  try {
-    const AllBills = await BillModel.find();
-    res.status(200).json({
-      message: "the bills fetched successfully",
-      data: AllBills,
-    });
-  } catch (err) {
-    res.status(404).json({
-      message: err.message,
-    });
-  }
-};
+const AddBill = asyncHandler(async (req, res) => {
+  const bill = await BillService.addBill(req.body, req.user.id);
 
-const GetBillbyID = async (req, res) => {
-  try {
-    const BillbyId = await BillModel.findById(req.params.id);
-    if(!BillbyId){
-      return res.status(404).json({
-        message:"Bill not found"
-      });
-    }
-    if(BillbyId.userID.toString() !== req.user.id){
-      return res.status(403).json({
-        message:"Forbidden"
-      });
-    }
-    res.status(200).json({
-      message: "the bill found successfully",
-      data: BillbyId,
-    });
-  } catch (err) {
-    res.status(404).json({
-      message: err.message,
-    });
-  }
-};
+  return sendSuccess(res, 201, "Bill added successfully", bill);
+});
 
-const DeleteBill = async (req, res) => {
-  try {
-    const bill = await BillModel.findById(req.params.id);
-    if(!bill){
-      return res.status(404).json({
-        message:"Bill not found"
-      });
-    }
-    if(bill.userID.toString() !== req.user.id){
-      return res.status(403).json({
-        message:"Forbidden"
-      });
-    }
+const GetAllBills = asyncHandler(async (req, res) => {
+  const bills = await BillService.getAllBills();
 
-    await BillModel.findByIdAndDelete(req.params.id);
-    res.status(200).json({
-      message: "the bill removed successfully",
-    });
-  } catch (err) {
-    res.status(404).json({
-      message: err.message,
-    });
-  }
-};
+  return sendSuccess(res, 200, "Bills fetched successfully", bills);
+});
 
-const GetBillbyUserID = async (req, res) => {
-  try {
-    const userId = req.user.id;
-    const BillbyUserID = await BillModel.find({
-      userID: userId,
-    }).populate("userID");
+const GetBillbyID = asyncHandler(async (req, res) => {
+  const bill = await BillService.getBillById(req.params.id, req.user.id);
 
-    res.status(200).json({
-      message: "Bill Found Successfully",
-      data: BillbyUserID,
-    });
-  } catch (error) {
-    res.status(500).json({
-      message: error.message,
-    });
-  }
-};
+  return sendSuccess(res, 200, "Bill found successfully", bill);
+});
+
+const DeleteBill = asyncHandler(async (req, res) => {
+  await BillService.deleteBill(req.params.id, req.user.id);
+
+  return sendSuccess(res, 200, "Bill deleted successfully");
+});
+
+const GetBillbyUserID = asyncHandler(async (req, res) => {
+  const bills = await BillService.getBillByUserId(req.user.id);
+
+  return sendSuccess(res, 200, "Bills found successfully", bills);
+});
 
 module.exports = {
   AddBill,
@@ -102,4 +39,3 @@ module.exports = {
   DeleteBill,
   GetBillbyUserID,
 };
-

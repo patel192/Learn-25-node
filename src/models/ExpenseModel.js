@@ -1,11 +1,6 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
-/**
- * --- EXPENSE MODEL ---
- * Tracks individual instances of money being spent.
- */
-
 const ExpenseSchema = new Schema(
   {
     userID: {
@@ -33,4 +28,4 @@ const ExpenseSchema = new Schema(
   },
 );
 
-module.exports = mongoose.model("expense", ExpenseSchema);
+module.exports = mongoose.model("expense", ExpenseSchema);

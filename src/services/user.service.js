@@ -76,8 +76,8 @@ const loginUser = async (data) => {
     { expiresIn: "7d" },
   );
 
-  const { password: _, ...userData } = foundUser.toObject();
-
+  const userData = foundUser.toObject();
+  delete userData.password;
   return {
     accessToken,
     refreshToken,
@@ -94,7 +94,7 @@ const refreshToken = async (token) => {
 
   try {
     decoded = jwt.verify(token, process.env.REFRESH_SECRET);
-  } catch (err) {
+  } catch {
     throw new UnauthorizedError("Invalid refresh token");
   }
 
@@ -163,14 +163,14 @@ const uploadProfilePicture = async (id, file) => {
   }
 
   const fileName = `profiles/${Date.now()}-${file.originalname}`;
-    await s3.send(
-      new PutObjectCommand({
-        Bucket: process.env.AWS_BUCKET_NAME,
-        Key: fileName,
-        Body: file.buffer,
-        ContentType: file.mimetype,
-      }),
-    );
+  await s3.send(
+    new PutObjectCommand({
+      Bucket: process.env.AWS_BUCKET_NAME,
+      Key: fileName,
+      Body: file.buffer,
+      ContentType: file.mimetype,
+    }),
+  );
   const imageUrl = `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${fileName}`;
 
   const updatedUser = await UserModel.findByIdAndUpdate(

@@ -1,5 +1,4 @@
 const request = require("supertest");
-const mongoose = require("mongoose");
 const app = require("../app");
 
 
@@ -27,7 +26,7 @@ describe("Delete Expense Authrization", () => {
         email:testUser.email,
         password:testUser.password
     });
-    token = loginRes.body.token;
+    token = loginRes.body.data.token;
 
     const category = await Category.create({
         name: "Delete Test Category",

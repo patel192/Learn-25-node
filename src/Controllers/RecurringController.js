@@ -1,109 +1,69 @@
-const RecurringModel = require("../models/RecurringModel");
-const createRecurring = async (req, res) => {
-  try {
-    const recurring = await RecurringModel.create(req.body);
-    res.status(201).json({
-      message: "Recurring transaction created",
-      data: recurring,
-    });
-  } catch (err) {
-    res.status(500).json({
-      message: "Error creating recurring transaction",
-      error: err.message,
-    });
-  }
-};
-const getRecurringByUser = async (req, res) => {
-  try {
-    const userId = req.user.id;
-    const recurring = await RecurringModel.find({
-      userId
-    });
-    res.status(200).json({
-      data: recurring,
-    });
-  } catch (err) {
-    res.status(500).json({
-      message: "Error fetching recurring transactions",
-    });
-  }
-};
+const asyncHandler = require("../middleware/asyncHandler");
+const RecurringService = require("../services/recurring.service");
+const {sendSuccess} = require("../utiles/response");
 
-const deleteRecurring = async (req, res) => {
-  try {
-    const recurring = await RecurringModel.findById(req.params.id);
-    if(!recurring){
-      return res.status(404).json({
-        messgae:"Recurring transaction not found"
-      });
-    }
-    if(recurring.userId.toString() !== req.user.id){
-      return res.status(403).json({
-        message:"You are not authorized to delete this recurring transaction"
-      });
-    }
-    await RecurringModel.findByIdAndDelete(req.params.id);
-    res.status(200).json({
-      message: "Recurring transaction deleted",
-    });
-  } catch (error) {
-    res.status(500).json({
-      message: `Error deleting recurring transaction, ${error}`,
-    });
-  }
-};
+const createRecurring = asyncHandler(async (req, res) => {
+  const recurring = await RecurringService.createRecurring(
+    req.body,
+    req.user.id,
+  );
 
-const updateRecurring = async (req, res) => {
-  try {
-    const updated = await RecurringModel.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true },
-    );
-    res.status(200).json({
-      message: "Recurring updated",
-      data: updated,
-    });
-  } catch (error) {
-    res.status(500).json({
-      message: "Error Updating recurring",
-    });
-  }
-};
+  return sendSuccess(res, 201, "Recurring transaction created", recurring);
+});
 
-const getUpcomingRecurring = async (req, res) => {
-  try {
-    const userId = req.user.id;
-    const today = new Date();
-    const upcoming = await RecurringModel.find({
-      userId:userId,
-      nextDate: { $gte: today },
-    })
-      .sort({ nextDate: 1 })
-      .limit(5);
-    res.json({ data: upcoming });
-  } catch (error) {
-    res.status(500).json({
-      message: "Error fetching upcoming payments",
-    });
-  }
-};
+const getRecurringByUser = asyncHandler(async (req, res) => {
+  const recurring = await RecurringService.getRecurringByUser(req.user.id);
 
-const toggleRecurringStatus = async (req, res) => {
-  try {
-    const recurring = await RecurringModel.findById(req.params.id);
-    recurring.isActive = !recurring.isActive;
-    await recurring.save();
-    res.json({
-      message: "Recurring status updated",
-      data: recurring,
-    });
-  } catch (error) {
-    res.status(500).json({
-      message: "Error updating recurring status",
-    });
-  }
-};
+  return sendSuccess(
+    res,
+    200,
+    "Recurring transactions fetched successfully",
+    recurring,
+  );
+});
+
+const deleteRecurring = asyncHandler(async (req, res) => {
+  await RecurringService.deleteRecurring(
+    req.params.id,
+    req.user.id
+  );
+
+  return sendSuccess(
+    res,
+    200,
+    "Recurring transaction deleted"
+  );
+});
+
+const updateRecurring = asyncHandler(async (req, res) => {
+  const recurring = await RecurringService.updateRecurring(
+    req.params.id,
+    req.body,
+    req.user.id,
+  );
+
+  return sendSuccess(res, 200, "Recurring updated successfully", recurring);
+});
+
+const getUpcomingRecurring = asyncHandler(async (req, res) => {
+  const upcoming = await RecurringService.getUpcomingRecurring(req.user.id);
+
+  return sendSuccess(
+    res,
+    200,
+    "Upcoming recurring transactions fetched successfully",
+    upcoming,
+  );
+});
+
+const toggleRecurringStatus = asyncHandler(async (req, res) => {
+  const recurring = await RecurringService.toggleRecurringStatus(
+    req.params.id,
+    req.user.id,
+  );
+
+  return sendSuccess(res, 200, "Recurring status updated", recurring);
+});
 
 module.exports = {
   createRecurring,
@@ -113,4 +73,3 @@ module.exports = {
   getUpcomingRecurring,
   toggleRecurringStatus,
 };
-

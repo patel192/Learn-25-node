@@ -1,5 +1,4 @@
 const request = require("supertest");
-const mongoose = require("mongoose");
 const app = require("../app");
 
 jest.setTimeout(20000);
@@ -37,7 +36,7 @@ describe("Auth Flow", () => {
 
     expect(res.statusCode).toBe(200);
 
-    token = res.body.token;
+    token = res.body.data.token;
     expect(token).toBeDefined();
   });
 

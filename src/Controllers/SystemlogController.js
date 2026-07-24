@@ -7,7 +7,7 @@ const createLog = async (req, res) => {
     const log = new SystemLog({ user, action, description });
     await log.save();
     res.status(201).json({ message: "Log entry created", log });
-  } catch (err) {
+  } catch{
     res.status(500).json({ error: "Failed to create log entry" });
   }
 };
@@ -20,7 +20,7 @@ const getLogs = async (req, res) => {
     message:"Logs fetched successfully",
     data:logs
     });
-  } catch (err) {
+  } catch {
     res.status(500).json({ error: "Failed to fetch logs" });
   }
 };

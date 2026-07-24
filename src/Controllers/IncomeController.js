@@ -1,104 +1,31 @@
-const IncomeModel = require("../models/IncomeModel");
-const AddIncome = async (req, res) => {
-  const incomeData = {...req.body,userID:req.user.id};
-  try {
-    const AddedIncome = await IncomeModel.create(incomeData);
-    res.status(201).json({
-      message: "the income is added successfully",
-      data: AddedIncome,
-    });
-  } catch (err) {
-    res.status(500).json({
-      message: err.message,
-    });
-  }
-};
+const IncomeService = require("../services/income.service");
+const asyncHandler = require("../middleware/asyncHandler");
+const {sendSuccess} = require("../utiles/response");
 
-const GetAllincome = async (req, res) => {
-  try {
-    const Allincome = await IncomeModel.find();
-    res.status(200).json({
-      message: "the income found successfully",
-      data: Allincome,
-    });
-  } catch (err) {
-    res.status(404).json({
-      message: err.message,
-    });
-  }
-};
+const AddIncome = asyncHandler(async (req, res) => {
+  const income = await IncomeService.addIncome(req.body,req.user.id);
+    return sendSuccess(res,201,"Income added successfully",income);
+});
 
-const GetIncomebyID = async (req, res) => {
-  try {
-    const IncomebyID = await IncomeModel.findById(req.params.id);
-    if(!IncomebyID){
-      return res.status(404).json({
-        message:"Income not found"
-      });
-    }
-    if(IncomebyID.userID.toString() !== req.user.id && req.user.role !== "Admin"){
-      return res.status(403).json({
-        message:"Forbidden"
-      });
-    }
-    res.status(200).json({
-      message: "the income found successfully",
-      data: IncomebyID,
-    });
-  } catch (err) {
-    res.status(404).json({
-      message: err.message,
-    });
-  }
-};
+const GetAllincome = asyncHandler(async (req, res) => {
+  const incomes = await IncomeService.getAllIncome();  
+  return sendSuccess(res,200,"Income fetched successfully",incomes);
+});
 
-const DeleteIncome = async (req, res) => {
-  try {
-    const income = await IncomeModel.findById(req.params.id);
-    if(!income){
-      return res.status(404).json({
-        message:"Income not found"
-      });
-    }
-    if(income.userID.toString() !== req.user.id){
-      return res.status(403).json({
-        message:"Forbidden"
-      });
-    }
-    await IncomeModel.findByIdAndDelete(req.params.id);
-    res.status(200).json({
-      message: "the income deleted successfully",
-    });
-  } catch (err) {
-    res.status(404).json({
-      message: err.message,
-    });
-  }
-};
+const GetIncomebyID = asyncHandler(async (req, res) => {
+    const income = await IncomeService.getIncomeById(req.params.id,req.user.id);
+   return sendSuccess(res,200,"Income found successfully",income);
+});
 
-const GetIncomebyUserID = async (req, res) => {
-  try {
-    const userId = req.user.id;
-    const IncomebyUserID = await IncomeModel.find({
-      userID:userId,
-    })
+const DeleteIncome = asyncHandler(async (req, res) => {
+    await IncomeService.deleteIncome(req.params.id,req.user.id);
+    return sendSuccess(res,200,"Income deleted successfully");
+});
 
-    if (IncomebyUserID.length === 0) {
-      res.status(404).json({
-        message: "No Income Found",
-      });
-    } else {
-      res.status(200).json({
-        message: "Income Found Successfully",
-        data: IncomebyUserID,
-      });
-    }
-  } catch (error) {
-    res.status(500).json({
-      message: error.message,
-    });
-  }
-};
+const GetIncomebyUserID = asyncHandler(async (req, res) => {
+    const incomes = await IncomeService.getIncomeByUserId(req.user.id);
+    return sendSuccess(res,200,"Income found successfully",incomes);
+});
 
 module.exports = {
   AddIncome,

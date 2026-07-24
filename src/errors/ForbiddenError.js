@@ -1,6 +1,6 @@
-const AppError = require("../AppError");
+const AppError = require("./AppError");
 class ForbiddenError extends AppError{
-    construtor(message = "Forbidden"){
+    constructor(message = "Forbidden"){
         super(message,403)
     }
 }

@@ -1,80 +1,38 @@
-const CategoryModel = require("../models/CategoryModel");
+const CategoryService = require("../services/category.service")
+const asyncHandler = require("../middleware/asyncHandler");
+const {sendSuccess} = require("../utiles/response");
+const AddCategory = asyncHandler(async (req, res) => {
+  const category = await CategoryService.addCategory(req.body);
 
-const AddCategory = async (req, res) => {
-  try {
-    const existing = await CategoryModel.findOne({
-      name:req.body.name,
-      type:req.body.type
-    });
-    if(!existing){
-      return res.status(409).json({
-        message:"Category already exists"
-      });
-    }
-    const AddedCategory = await CategoryModel.create(req.body);
-    res.status(201).json({
-      message: "the category added successfully",
-      data: AddedCategory,
-    });
-  } catch (err) {
-    res.status(500).json({
-      message: err.message,
-    });
-  }
-};
+  return sendSuccess(res, 201, "Category added successfully", category);
+});
 
-const GetAllCategory = async (req, res) => {
-  try {
-    const Allcategory = await CategoryModel.find();
-    res.status(200).json({
-      message: "the categories found successfully",
-      data: Allcategory,
-    });
-  } catch (err) {
-    res.status(404).json({
-      message: err.message,
-    });
-  }
-};
+const GetAllCategory = asyncHandler(async (req, res) => {
+  const categories = await CategoryService.getAllCategory();
 
-const GetCategorybyID = async (req, res) => {
-  try {
-    const CategorybyID = await CategoryModel.findById(req.params.id);
-    if(!CategorybyID){
-      return res.status(404).json({
-        message:"Category not found"
-      });
-    }
-    res.status(200).json({
-      message: "the category found successfully",
-      data: CategorybyID,
-    });
-  } catch (err) {
-    res.status(404).json({
-      message: err.message,
-    });
-  }
-};
+  return sendSuccess(res, 200, "Categories fetched successfully", categories);
+});
 
-const DeleteCategory = async (req, res) => {
-  try {
-    const category = await CategoryModel.findById(req.params.id);
-    if(!category){
-      return res.status(404).json({
-        message:"Category not found"
-      });
-    }
-    await CategoryModel.findByIdAndDelete(req.params.id);
-    res.status(200).json({
-      message: "the Category deleted successfully",
-    });
-  } catch (err) {
-    res.status(404).json({
-      message: err.message,
-    });
-  }
-};
+const GetCategorybyID = asyncHandler(async (req, res) => {
+  const category = await CategoryService.getCategoryById(req.params.id);
 
+  return sendSuccess(
+    res,
+    200,
+    "Category found successfully",
+    category
+  );
+});
+
+const DeleteCategory = asyncHandler(async (req, res) => {
+  await CategoryService.deleteCategory(req.params.id);
+
+  return sendSuccess(
+    res,
+    200,
+    "Category deleted successfully"
+  );
+});
 module.exports = {
   AddCategory,
   GetAllCategory,

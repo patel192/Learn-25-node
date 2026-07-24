@@ -1,11 +1,10 @@
 const request = require("supertest");
 const app = require("../app");
-const mongoose = require("mongoose");
 describe("Expense Routes Auth Protection", () => {
   test("GET /api/expenses should return 401 without token", async () => {
     const res = await request(app).get("/api/expenses");
     expect(res.statusCode).toBe(401);
-    expect(res.body.message).toMatch(/NO token/i);
+    expect(res.body.message).toBe("Authentication required");
   });
 
   test("GET /api/expenses should return 401 with invalid token", async () => {

@@ -1,105 +1,67 @@
-const BudgetModel = require("../models/BudgetModel");
+const asyncHandler = require("../middleware/asyncHandler");
+const BudgetService = require("../services/budget.service");
+const {sendSuccess} = require("../utiles/response");
 
-const AddBudget = async (req, res) => {
-  const budgetData = {...req.body,userID:req.user.id};
-  try {
-    const AddedBudget = await BudgetModel.create(budgetData);
-    res.status(201).json({
-      message: "the budget is added successfully",
-      data: AddedBudget,
-    });
-  } catch (err) {
-    res.status(500).json({
-      message: err.message,
-    });
-  }
-};
+const AddBudget = asyncHandler(async (req, res) => {
+  const budget = await BudgetService.addBudget(req.body, req.user.id);
+  return sendSuccess(
+    res,
+    201,
+    "Budget added successfully",
+    budget
+  );
+});
 
-const GetAllbudget = async (req, res) => {
-  try {
-    const Allbudget = await BudgetModel.find().populate("categoryID");
-    res.status(200).json({
-      message: "the budgets fetched successfully",
-      data: Allbudget,
-    });
-  } catch (err) {
-    res.status(404).json({
-      message: err.message,
-    });
-  }
-};
+const GetAllbudget = asyncHandler(async (req, res) => {
+  const budgets = await BudgetService.getAllBudget();
 
-const GetBudgetbyID = async (req, res) => {
-  try {
-    const BudgetbyId = await BudgetModel.findById(req.params.id);
-    if(!BudgetbyId){
-      return res.status(404).json({
-        message:"Budget not found"
-      });
-    }
-    if(BudgetbyId.userID.toString() !== req.user.id){
-      return res.status(403).json({
-        message:"Forbidden"
-      });
-    }
-    res.status(200).json({
-      message: "the budget found successfully",
-      data: BudgetbyId,
-    });
-  } catch (err) {
-    res.status(404).json({
-      message: err.message,
-    });
-  }
-};
+  return sendSuccess(
+    res,
+    200,
+    "Budgets fetched successfully",
+    budgets
+  );
+});
 
-const DeleteBudget = async (req, res) => {
-  try {
-    const budget = await BudgetModel.findById(req.params.id);
-    if(!budget){
-      return res.status(404).json({
-        message:"Budget not found"
-      });
-    }
-    if(budget.userID.toString() !== req.user.id){
-      return res.status(403).json({
-        message:"Forbidden"
-      });
-    }
-    await BudgetModel.findByIdAndDelete(req.params.id);
-    res.status(200).json({
-      message: "the budget removed successfully",
-    });
-  } catch (err) {
-    res.status(404).json({
-      message: err.message,
-    });
-  }
-};
+const GetBudgetbyID = asyncHandler(async (req, res) => {
+  const budget = await BudgetService.getBudgetById(
+    req.params.id,
+    req.user.id
+  );
 
-const GetBudgetbyUserID = async (req, res) => {
-  try {
-    const userId = req.user.id;
-    const BudgetbyUserID = await BudgetModel.find({
-      userID: userId,
-    }).populate("userID categoryID");
+  return sendSuccess(
+    res,
+    200,
+    "Budget found successfully",
+    budget
+  );
+});
 
-    if (BudgetbyUserID.length === 0) {
-      res.status(404).json({
-        message: "No Budget Found",
-      });
-    } else {
-      res.status(200).json({
-        message: "Budget Found Successfully",
-        data: BudgetbyUserID,
-      });
-    }
-  } catch (error) {
-    res.status(500).json({
-      message: error.message,
-    });
-  }
-};
+const DeleteBudget = asyncHandler(async (req, res) => {
+  await BudgetService.deleteBudget(
+    req.params.id,
+    req.user.id
+  );
+
+  return sendSuccess(
+    res,
+    200,
+    "Budget deleted successfully"
+  );
+});
+
+const GetBudgetbyUserID = asyncHandler(async (req, res) => {
+  const budgets = await BudgetService.getBudgetByUserId(
+    req.user.id
+  );
+
+  return sendSuccess(
+    res,
+    200,
+    "Budget found successfully",
+    budgets
+  );
+});
 
 module.exports = {
   AddBudget,

@@ -1,5 +1,4 @@
 const request = require("supertest");
-const mongoose = require("mongoose");
 const app = require("../app");
 const Category = require("../src/models/CategoryModel");
 
@@ -28,7 +27,7 @@ describe("Update Expense Flow", () => {
       password: testUser.password
     });
 
-    token = loginRes.body.token;
+    token = loginRes.body.data.token;
 
     const category = await Category.create({
       name: "Update Category",

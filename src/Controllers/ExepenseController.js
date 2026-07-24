@@ -1,171 +1,48 @@
-const ExpenseModel = require("../models/ExpenseModel");
+const ExpenseService = require("../services/expense.service");
+const asyncHandler = require("../middleware/asyncHandler");
+const { sendSuccess } = require("../utiles/response");
 
-const AddExpense = async (req, res) => {
-  try {
-    const expenseData = {...req.body,userID:req.user.id};
-    const AddedExpense = await ExpenseModel.create(expenseData);
-    res.status(201).json({
-      message: "the expense added successfully",
-      data: AddedExpense,
-    });
-  } catch (err) {
-    res.status(500).json({
-      message: err.message,
-    });
-  }
-};
+const AddExpense = asyncHandler(async (req, res) => {
+  const expense = await ExpenseService.addExpense(req.body, req.user.id);
+  return sendSuccess(res, 201, "Expense Added successfully", expense);
+});
 
-const GetAllExpenses = async (req, res) => {
-  try {
-    const AllExpenses = await ExpenseModel.find().populate("categoryID");
-    res.status(200).json({
-      message: "The expenses fetched successfully",
-      data: AllExpenses,
-    });
-  } catch (err) {
-    res.status(404).json({
-      message: err.message,
-    });
-  }
-};
+const GetAllExpenses = asyncHandler(async (req, res) => {
+    const expenses = await ExpenseService.getAllExpenses();
+    return sendSuccess(res,200,"Expenses fetched successfully",expenses);
+});
 
-const DeleteExpense = async (req, res) => {
-  try {
-    const expense = await ExpenseModel.findById(req.params.id);
+const DeleteExpense = asyncHandler(async (req, res) => {
+  await ExpenseService.deleteExpense(req.params.id, req.user.id);
+  return sendSuccess(res, 200, "Expense Deleted Successfully");
+});
 
-    if (!expense) {
-      return res.status(404).json({ message: "Expense not found" });
-    }
+const UpdateExpense = asyncHandler(async (req, res) => {
+  const updatedExpense = await ExpenseService.updateExpense(
+    req.params.id,
+    req.body,
+    req.user.id,
+  );
+  return sendSuccess(res, 200, "Expense updated successfully", updatedExpense);
+});
 
-    if (expense.userID.toString() !== req.user.id) {
-      return res.status(403).json({
-        message: "You are not authorized to delete this expense",
-      });
-    }
+const GetExpensebyID = asyncHandler(async (req, res) => {
+  const expense = await ExpenseService.getExpenseById(
+    req.params.id,
+    req.user.id,
+  );
+  return sendSuccess(res, 200, "Expense fetched successfuy", expense);
+});
 
-    await ExpenseModel.findByIdAndDelete(req.params.id);
+const GetExpensebyUserId = asyncHandler(async (req, res) => {
+  const expenses = await ExpenseService.getExpenseByUserId(req.user.id,req.query);
+  return sendSuccess(res,200,"Expense found successfully",expenses);
+});
 
-    res.status(200).json({
-      message: "Expense deleted successfully",
-    });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-};
-
-const UpdateExpense = async (req, res) => {
-  try {
-    const expense = await ExpenseModel.findById(req.params.id);
-
-    if (!expense) {
-      return res.status(404).json({ message: "Expense not found" });
-    }
-
-    if (expense.userID.toString() !== req.user.id) {
-      return res.status(403).json({
-        message: "You are not authorized to update this expense",
-      });
-    }
-
-    const updatedExpense = await ExpenseModel.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true },
-    );
-
-    res.status(200).json({
-      message: "Expense updated successfully",
-      data: updatedExpense,
-    });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-};
-
-const GetExpensebyID = async (req, res) => {
-  try {
-    const ExpensebyID = await ExpenseModel.findById(req.params.id);
-    if(!ExpensebyID){
-      return res.status(404).json({
-        message:"Expense not found"
-      })
-    }
-    if(ExpensebyID.userID.toString() !== req.user.id && req.user.role !== "Admin"){
-      return res.status(403).json({
-        message:"Forbidden: You are not authorized to access this expense"
-      });
-    }
-    res.status(200).json({
-      message: "The expense fetched successfully",
-      data: ExpensebyID,
-    });
-  } catch (error) {
-    res.status(404).json({
-      message: error.message,
-    });
-  }
-};
-
-const GetExpensebyUserId = async (req, res) => {
-  try {
-    const userId = req.user.id;    
-    const { startDate, endDate, categoryID, minAmount, maxAmount } = req.query;
-
-    let query = { userID: userId };
-
-    if (startDate || endDate) {
-      query.date = {};
-      if (startDate) query.date.$gte = new Date(startDate);
-      if (endDate) query.date.$lte = new Date(endDate);
-    }
-    if (categoryID) {
-      query.categoryID = categoryID;
-    }
-
-    if (minAmount || maxAmount) {
-      query.amount = {};
-      if (minAmount) query.amount.$gte = Number(minAmount);
-      if (maxAmount) query.amount.$lte = Number(maxAmount);
-    }
-
-    const expenses = await ExpenseModel.find(query)
-      .populate("userID categoryID")
-      .sort({ date: -1 });
-
-    if (expenses.length === 0) {
-      return res.status(200).json({
-        message: "No Expenses Found matching filters",
-        data: [],
-      });
-    }
-
-    res.status(200).json({
-      message: "Expenses Found Successfully",
-      data: expenses,
-    });
-  } catch (error) {
-    res.status(500).json({
-      message: error.message,
-    });
-  }
-};
-
-const GetRecentExpenses = async (req, res) => {
-  try {
-    const recentExpenses = await ExpenseModel.find({ userID: req.user.id })
-      .sort({ date: -1 }) // newest first
-      .limit(5); // limit to 5 results
-
-    res.status(200).json({
-      success: true,
-      data: recentExpenses,
-    });
-  } catch (err) {
-    res.status(500).json({
-      message: err.message,
-    });
-  }
-};
+const GetRecentExpenses = asyncHandler(async (req, res) => {
+   const recentExpenses = await ExpenseService.getRecentExpenses(req.params.userId);
+    return sendSuccess(res,200,"Recent expenses fetched successfully",recentExpenses);
+});
 
 module.exports = {
   AddExpense,
