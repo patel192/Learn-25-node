@@ -40,8 +40,13 @@ const GetExpensebyUserId = asyncHandler(async (req, res) => {
 });
 
 const GetRecentExpenses = asyncHandler(async (req, res) => {
-   const recentExpenses = await ExpenseService.getRecentExpenses(req.params.userId);
-    return sendSuccess(res,200,"Recent expenses fetched successfully",recentExpenses);
+   const recentExpenses = await ExpenseService.getRecentExpenses(req.user.id);
+   return sendSuccess(
+      res,
+      200,
+      "Recent expenses fetched successfully",
+      recentExpenses
+   );
 });
 
 module.exports = {
