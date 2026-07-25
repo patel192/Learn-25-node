@@ -50,12 +50,13 @@ const aiLimiter = rateLimit({
 });
 app.set("trust proxy", 1);
 app.use(helmet());
-app.use(morgan("combined"));
-app.use(mongoSanitize());
-app.use(express.json());
-app.use(cookieParser());
 app.use(cors(corsOptions));
 app.options("*", cors(corsOptions));
+app.use(morgan("combined"));
+app.use(express.json());
+app.use(cookieParser());
+app.use(mongoSanitize());
+app.use("/api/ai", aiLimiter);
 app.use("/api/ai", aiRoutes);
 app.use("/api/user",authLimiter);
 app.get("/health", (req, res) => {
@@ -75,7 +76,6 @@ app.use("/api", transactionRoutes);
 app.use("/api", budgetRoutes);
 app.use("/api", systemlogRoutes);
 app.use("/api", billRoutes);
-app.use("/api/ai", aiLimiter);
 app.use("/api", reportRoutes);
 app.use(errorHandler);
 
